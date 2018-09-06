@@ -1,0 +1,124 @@
+#
+# RFCOMM configuration file.
+#
+
+#2806
+rfcomm0 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:75:AC;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2806";
+}
+
+#2807
+rfcomm1 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:75:AE;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2807";
+}
+
+#2803
+rfcomm2 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:5B:DD;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2807";
+}
+
+
+#2789
+rfcomm3 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:5C:10;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2789";
+}
+
+#2795
+rfcomm4 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:75:63;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2795";
+}
+
+#2797
+rfcomm5 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:5D:11;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2797";
+}
+
+#2802
+rfcomm6 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:75:9C;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2802";
+}
+
+#2798
+rfcomm7 {
+	# Automatically bind the device at startup
+	bind yes;
+
+	# Bluetooth address of the device
+	device 10:00:E8:AD:75:91;
+
+	# RFCOMM channel for the connection
+	channel	1;
+
+	# Description of the connection
+	comment "e-puck_2798";
+}
