@@ -1,23 +1,7 @@
 #include "interface.h"
 
-#define ROBOT_NUMBER 1
+#define ROBOT_NUMBER "0"
 
-void MoveOld(double mm)
-{
-	int steps;
-	steps=mm*7.763372409;
-	SetTargetSteps(steps,steps);
-	printf("\nMoved %d steps left and %d steps right.\n", GetSteps().l, GetSteps().r);
-}
-
-void MoveOld2(double mm)
-{
-	Steps steps;
-	steps.l=MM_PER_PULSE_L/mm;
-	steps.r=MM_PER_PULSE_R/mm;
-	SetTargetSteps(steps.l,steps.r);
-	printf("\nMoved %d steps left and %d steps right.\n", GetSteps().l, GetSteps().r);
-}
 
 void MoveSetSpeed(double mm)
 {
@@ -55,12 +39,11 @@ void Move(double mm)
 
 	printf("\nMoved %d steps left and %d steps right.\n", GetSteps().l, GetSteps().r);
 }
-/*
-	steps.l=(int)rint(degrees*3.472222222);
-	steps.r=(-1)*(int)rint(degrees*3.472222222);
-*/
+
 void Turn(double degrees)
 {
+	ClearSteps();
+
 	Steps steps, steps_mm;
 	double arc;
 
@@ -70,42 +53,43 @@ void Turn(double degrees)
 	steps_mm.r = (int)rint(arc); 
 	steps = mm2enc(steps_mm);
 
-	SetTargetSteps(steps.l,-(steps.r));
+	SetTargetSteps(steps.l, -(steps.r));
 }
 
 //==============================================================================//
 //                                  main                                        //
 //==============================================================================//
 int main(int argc, char *argv[])
- {
+{
 
-//epuck connection
-epuck(ROBOT_NUMBER);
-
-
-Posture posture;     //get posture; float(x,y,th)
-
-Steps steps;  // get steps: int (l,r)
-
-Steps en_mm;    // steps to mm int (l,r)
-
-Steps mm_en;    // mm to encoder int (l,r)
-
-Speed speed;       // get speed int (l,r)
-
-Speed speed_mm;       // get speed in mm int (l,r)
-
-Sensors ir;       // get sensors vlotage unsigned int (sensor)
+	//epuck connection
+	epuck(ROBOT_NUMBER);
 
 
+	Posture posture;     //get posture; float(x,y,th)
 
-double vlin, vrot;
-int i;
+	Steps steps;  // get steps: int (l,r)
+
+	Steps en_mm;    // steps to mm int (l,r)
+
+	Steps mm_en;    // mm to encoder int (l,r)
+
+	Speed speed;       // get speed int (l,r)
+
+	Speed speed_mm;       // get speed in mm int (l,r)
+
+	Sensors ir;       // get sensors vlotage unsigned int (sensor)
+
+
+
+	double vlin, vrot;
+	int i;
 
 
 	printf("Starting...\n");
-//Step 5
-/*
+	ClearSteps();
+	//Step 5
+	/*
 	int left_stepcount=1000, right_stepcount=1000;
 	printf("\nMoving wheels for %d step counts\n", ((left_stepcount+right_stepcount)/2));
 	SetTargetSteps(left_stepcount, right_stepcount);
@@ -113,9 +97,9 @@ int i;
 	printf("\nMoving right wheel for 2000 and left wheel for 3000 step counts.\n");
 	SetTargetSteps(2000,3000);
 
-*/
-//Step 6
-/*
+	*/
+	//Step 6
+	/*
 	printf("\nSet speed to 100.\n");
 	for (int i=0;i<50;i++)
  {
@@ -148,13 +132,12 @@ for (int i=0;i<5;i++)
 */
 
 // Step 9
-/*
-Move(128);
-*/
+//Move(128);
 
 // Step 10;
-/*
 Turn(360);
+Turn(-360);
+/*
 SetTargetSteps((PI*WHEEL_DIAMETER_L), -(PI*WHEEL_DIAMETER_R));
 SetTargetSteps(1250,-1250);
 // Example 0 (Note: LEDs only works with real robot)
@@ -163,8 +146,8 @@ SetRingLED (led);
 */
 
 // Step 11
-Move(300);
-MoveSetSpeed(300);
+//Move(300);
+//MoveSetSpeed(300);
 
 //SetTargetSteps(1000, 1000);
 /*
