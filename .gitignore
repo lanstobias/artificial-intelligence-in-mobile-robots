@@ -163,3 +163,14 @@ $RECYCLE.BIN/
 
 # End of https://www.gitignore.io/api/c,vim,c++,linux,macos,windows
 
+# Ignore files without extension
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all dirs
+!*/
+
+.DS_Store
