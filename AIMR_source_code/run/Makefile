@@ -44,6 +44,9 @@ SIM_SRC=\
   $(SIM_DIR_INC)/maps.h\
   $(SIM_DIR_INC)/lists.h
 
+#----- custom -----
+custom_sim: clean_sim sim
+custom_real: clean_real real
 
 #--------------------------------------
 # Rules for real robot
