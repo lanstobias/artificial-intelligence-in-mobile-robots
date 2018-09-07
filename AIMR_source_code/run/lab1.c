@@ -56,7 +56,7 @@ void Turn(double degrees)
 
 void lab1()
 {
-	printf("Starting labb 1\n");
+	printf("Starting lab 1\n");
 
 	Turn(360);
 }
