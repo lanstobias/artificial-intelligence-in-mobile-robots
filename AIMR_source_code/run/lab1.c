@@ -94,6 +94,11 @@ void lab1()
 		Sleep(1);
 		Stop();
 	}
+	// Setspeed makes then car go forward at a set speed.
+	// Sleep delays the execution of the program for a set amount of milliseconds.
+  // Stop sets speed to 0,0.
+	// If speed is set to different values, the wheels go at different speeds making the robot turn.
+  // It does turn, but it takes a while to notice, and the space is not sufficent.
 	*/
 
 	// Step 7
@@ -105,6 +110,7 @@ void lab1()
 		SetTargetSteps(500,500);
 		SetTargetSteps(-500,-500);
 	}
+	// The main difference between settargetsteps and setspeed is the acceleration.
 	*/
 
 	// Step 8
@@ -120,6 +126,7 @@ void lab1()
 		Sleep(1000);
 		Stop();
 	}
+	// The main difference between settargetsteps and setspeed is the acceleration.
 	*/
 
 	// Step 9
@@ -145,6 +152,7 @@ void lab1()
 	printf("\nMove the robot with SetSpeed() and GetSteps().\n");
 	Move(300);
 	MoveSetSpeed(300);
+	// The original Move funciton is more accurate than the one based on GetSteps() funciton.
 	*/
 
 	// Step 12 (Optional)
