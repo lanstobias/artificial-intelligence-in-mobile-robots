@@ -18,8 +18,8 @@ int main(int argc, char *argv[])
 	printf("Starting...\n");
 
 	//example();
-	lab1();
-	//lab2();
+	//lab1();
+	lab2();
 
 	printf("Done...\n");
 
