@@ -63,6 +63,52 @@ void MoveSetSpeed(double mm)
 }
 
 //==============================================================================//
+//                         lab 1 - task 12 (Optional)                           //
+//==============================================================================//
+void MoveSetSpeedSleep(double mm)
+{
+	ClearSteps();
+
+	Steps steps, steps_mm;
+	steps_mm.l = mm;
+	steps_mm.r = mm;
+	steps = mm2enc(steps_mm);
+
+	SetSpeed(100, 100);
+
+	long wait = (steps.l/100) * 1000;
+	Sleep(wait);
+
+	Stop();
+}
+
+//==============================================================================//
+//                         lab 1 - task 13 (Optional)                           //
+//==============================================================================//
+void Airbag()
+{
+	SetSpeed(130, 130);
+
+	Sensors sensors;
+	int b = 0;
+
+	while(b < 1) {
+		Sleep(1000);
+		sensors = GetIR();
+		for(int i=0; i<8; i++) {
+			printf("Sensor %d: %d | ", i+1, sensors.sensor[i]);
+			if (sensors.sensor[i] > 800) {
+				b = 1;
+				break;
+			}
+		}
+		printf("\n");
+	}
+
+	Stop();
+}
+
+//==============================================================================//
 //                                  lab 1                                       //
 //==============================================================================//
 void lab1()
@@ -158,17 +204,22 @@ void lab1()
 	// Step 12 (Optional)
 	//============================================================================//
 	/*
-	// see function
+	// see function MoveSetSpeedSleep
 	printf("\nMove the robot SetSpeed() and Sleep().\n");
-
+	MoveSetSpeedSleep(100);
+	// Pretty worse due to the Polling rates. Also Speed is steps per seconds.
+	// There will be rounding errors.
 	*/
 
 	// Step 13 (Optional)
 	//============================================================================//
-	/*
-	// see function
-	printf("\nRun a Sensorprogram on the robot.\n");
 
-	*/
+	// see function Airbag
+	printf("\nRun a Sensorprogram on the robot.\n");
+	Airbag();
+	// Never crash into a wall again!
+	// Sensor activity > 800 leads to an immediate Stop.
+
+
 
 }
