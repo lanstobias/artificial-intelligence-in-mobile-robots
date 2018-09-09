@@ -118,8 +118,13 @@ make sim
 ```
 
 ```
+export DISPLAY=:0
+```
+
+```
 ./sim
 ```
+
 ------------------------------------------
 4-Documentation of library related to the course: 
 ------------------------------------------
