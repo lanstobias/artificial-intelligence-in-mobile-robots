@@ -40,8 +40,8 @@ Posture compute_relative_displacement(Steps steps_mm)
 	// Compute d and delta
 	float d = (d_r + d_l) / 2;
 	posture_displacement.th = ((d_r - d_l) / ROBOT_DIAMETER);
-	float threesixty = 360;
-	fmodf(posture_displacement.th, threesixty);  
+	float twopi = 2*PI;
+	posture_displacement.th=fmodf(posture_displacement.th, twopi);  
 
 	// Compute d_x, d_y
 	posture_displacement.x = (d * cos(posture_displacement.th / 2));
@@ -65,7 +65,10 @@ void convert_to_global_values(Posture posture_old, Posture relative_displacement
     posture_new.x = x_0 + d_x * cos(th_0) - d_y * sin(th_0);
     posture_new.y = y_0 + d_x * sin(th_0) + d_y * cos(th_0);
     posture_new.th = th_0 + delta;
-
+    
+    float twopi = 2*PI;
+	posture_new.th=fmodf(posture_new.th, twopi);
+	
     SetPosture(posture_new.x, posture_new.y, posture_new.th);
 }
 
@@ -103,5 +106,18 @@ void lab2()
         update_position();
         print_position();
     }
+
+    SetSpeed(250, 500);
+
+    for (int i = 0; i < 1000; i++)
+    {
+		update_position();
+		print_position();	
+		Sleep(100);
+
+	}
+	
+
+    
     
 }
