@@ -1,5 +1,21 @@
 #include "interface.h"
 
+void Turn2(double degrees)
+{
+	ClearSteps();
+
+	Steps steps, steps_mm;
+	double arc;
+
+	arc = degrees/360*PI*ROBOT_DIAMETER;
+
+	steps_mm.l = (int)rint(arc);
+	steps_mm.r = (int)rint(arc);
+	steps = mm2enc(steps_mm);
+
+	SetTargetSteps(-(steps.l), steps.r);
+}
+
 Steps read_displacement_of_wheels()
 {
 	Steps steps, steps_mm;
@@ -24,6 +40,8 @@ Posture compute_relative_displacement(Steps steps_mm)
 	// Compute d and delta
 	float d = (d_r + d_l) / 2;
 	posture_displacement.th = ((d_r - d_l) / ROBOT_DIAMETER);
+	float threesixty = 360;
+	fmodf(posture_displacement.th, threesixty);  
 
 	// Compute d_x, d_y
 	posture_displacement.x = (d * cos(posture_displacement.th / 2));
@@ -73,12 +91,17 @@ void lab2()
 {
 	ClearSteps();
 	printf("Lab 2..\n\n");
+	print_position();
+	Turn2(360);
+	update_position();
+        print_position();
 
-    print_position();
+    
     for (int i = 0; i < 10; i++)
     {
-        SetTargetSteps(200, 220);
+        SetTargetSteps(100, 140);
         update_position();
         print_position();
     }
+    
 }

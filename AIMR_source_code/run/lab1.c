@@ -11,7 +11,7 @@ void Move(double mm)
 	steps_mm.l=mm;
 	steps_mm.r=mm;
 	steps = mm2enc(steps_mm);
-	printf("steps.l: %d\n", steps.l);
+	printf("steps: %d\n", steps.l);
 
 	SetTargetSteps(steps.l,steps.r);
 
@@ -34,7 +34,7 @@ void Turn(double degrees)
 	steps_mm.r = (int)rint(arc);
 	steps = mm2enc(steps_mm);
 
-	SetTargetSteps(steps.l, -(steps.r));
+	SetTargetSteps(-(steps.l), steps.r);
 }
 
 //==============================================================================//
@@ -48,7 +48,7 @@ void MoveSetSpeed(double mm)
 	steps_mm.l = mm;
 	steps_mm.r = mm;
 	steps = mm2enc(steps_mm);
-	printf("steps.l: %d\n", steps.l);
+	printf("steps: %d\n", steps.l);
 
 
 	SetSpeed(500, 500);
@@ -121,47 +121,58 @@ void lab1()
 
 	// Step 5
 	//============================================================================//
-	/*
+	
 	// equal stepcounts
-	int left_stepcount=1000, right_stepcount=1000;
+	int left_stepcount=500, right_stepcount=500;
 	printf("\nMoving wheels for %d step counts\n", ((left_stepcount+right_stepcount)/2));
 	SetTargetSteps(left_stepcount, right_stepcount);
 	// unequal stepcounts
-	printf("\nMoving right wheel for 2000 and left wheel for 3000 step counts.\n");
-	SetTargetSteps(2000,3000);
-	*/
+	printf("\nMoving right wheel for 700 and left wheel for 800 step counts.\n");
+	ClearSteps();
+	SetTargetSteps(700,800);
+	
 
 	// Step 6
 	//============================================================================//
-	/*
+	
+	ClearSteps();
+	
 	printf("\nSet speed to 300 on the right wheel and 400 on the left.\n");
-	for (int i=0;i<50;i++) {
+	for (int i=0;i<4;i++) {
 		SetSpeed(300,400);
-		Sleep(1);
+		Sleep(500);
 		Stop();
+		Sleep(500);
 	}
+	Stop();
+	
 	// Setspeed makes then car go forward at a set speed.
 	// Sleep delays the execution of the program for a set amount of milliseconds.
   // Stop sets speed to 0,0.
 	// If speed is set to different values, the wheels go at different speeds making the robot turn.
   // It does turn, but it takes a while to notice, and the space is not sufficent.
-	*/
+	
 
 	// Step 7
 	//============================================================================//
-	/*
+	//ClearSteps();
+	
 	printf("\nMake the robot go back and forth 5 times between two points (1st Option).\n");
 	for (int i=0;i<5;i++)
 	{
-		SetTargetSteps(500,500);
-		SetTargetSteps(-500,-500);
+
+		SetTargetSteps(250,250);
+		SetTargetSteps(-250,-250);
 	}
+	
+	
 	// The main difference between settargetsteps and setspeed is the acceleration.
-	*/
+	
 
 	// Step 8
 	//============================================================================//
-	/*
+	ClearSteps();
+	
 	printf("\nMake the robot go back and forth 5 times between two points (2nd Option).\n");
 	for (int i=0;i<5;i++)
 	{
@@ -173,53 +184,54 @@ void lab1()
 		Stop();
 	}
 	// The main difference between settargetsteps and setspeed is the acceleration.
-	*/
+	
 
 	// Step 9
 	//============================================================================//
-	/*
+	ClearSteps();
+	
 	// see function Move
 	printf("\nMove the robot a specific number of mm.\n");
 	Move(128);
-	*/
+	
 
 	// Step 10
 	//============================================================================//
-	/*
+	ClearSteps();
+	
 	// see function Turn
 	printf("\nTurn the robot the given number of degrees.\n");
 	Turn(360);
-	*/
+	
 
 	// Step 11 (Optional)
 	//============================================================================//
-	/*
+	ClearSteps();
 	// see function MoveSetSpeed
 	printf("\nMove the robot with SetSpeed() and GetSteps().\n");
 	Move(300);
 	MoveSetSpeed(300);
 	// The original Move funciton is more accurate than the one based on GetSteps() funciton.
-	*/
+	
 
 	// Step 12 (Optional)
 	//============================================================================//
-	/*
+	ClearSteps();
 	// see function MoveSetSpeedSleep
 	printf("\nMove the robot SetSpeed() and Sleep().\n");
 	MoveSetSpeedSleep(100);
 	// Pretty worse due to the Polling rates. Also Speed is steps per seconds.
 	// There will be rounding errors.
-	*/
+	
 
 	// Step 13 (Optional)
 	//============================================================================//
-
+	ClearSteps();
 	// see function Airbag
 	printf("\nRun a Sensorprogram on the robot.\n");
 	Airbag();
 	// Never crash into a wall again!
 	// Sensor activity > 800 leads to an immediate Stop.
-
 
 
 }
