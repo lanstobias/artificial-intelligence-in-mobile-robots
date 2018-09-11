@@ -3,7 +3,7 @@
 #include "lab1.c"
 #include "lab2.c"
 
-#define ROBOT_NUMBER "1"
+#define ROBOT_NUMBER 1
 
 
 //==============================================================================//
