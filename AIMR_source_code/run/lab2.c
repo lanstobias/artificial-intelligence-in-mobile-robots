@@ -3,7 +3,6 @@
 Steps read_displacement_of_wheels()
 {
 	Steps steps, steps_mm;
-	Posture new_posture;
 	
 	// Read new step motor values
 	steps = GetSteps();
