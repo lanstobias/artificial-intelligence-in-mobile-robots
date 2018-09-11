@@ -2,12 +2,16 @@
 
 void example()
 {
+    /* Unused variables, as far as i can tell.
+     *
 	Posture posture; //get posture; float(x,y,th)
 	Steps steps;     // get steps: int (l,r)
 	Steps en_mm;     // steps to mm int (l,r)
 	Steps mm_en;     // mm to encoder int (l,r)
 	Speed speed;     // get speed int (l,r)
 	Speed speed_mm;  // get speed in mm int (l,r)
+    */
+
 	Sensors ir;      // get sensors vlotage unsigned int (sensor)
 
 	double vlin, vrot;
