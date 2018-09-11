@@ -1,6 +1,6 @@
 #include "interface.h"
 
-example()
+void example()
 {
 	Posture posture; //get posture; float(x,y,th)
 	Steps steps;     // get steps: int (l,r)
