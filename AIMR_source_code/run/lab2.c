@@ -1,4 +1,5 @@
 #include "interface.h"
+#include "lab2.h"
 
 Steps read_displacement_of_wheels()
 {

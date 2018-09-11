@@ -1,7 +1,7 @@
 #include "interface.h"
 #include "example.c"
-#include "lab1.c"
-#include "lab2.c"
+#include "lab1.h"
+#include "lab2.h"
 
 #define ROBOT_NUMBER 1
 
