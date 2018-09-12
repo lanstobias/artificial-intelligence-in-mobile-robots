@@ -2,6 +2,7 @@
 #include "example.c"
 #include "lab1.h"
 #include "lab2.h"
+#include "lab3.h"
 
 #define ROBOT_NUMBER 1
 
@@ -18,8 +19,9 @@ int main(int argc, char *argv[])
 	printf("Starting...\n");
 
 	//example();
-	lab1();
-	lab2();
+	//lab1();
+	//lab2();
+	lab3();
 
 	printf("Done...\n");
 

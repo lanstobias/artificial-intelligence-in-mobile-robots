@@ -74,10 +74,9 @@ void MoveSetSpeedSleep(double mm)
 	ClearSteps();
 
 	// convert mm to steps
-	Steps steps, steps_mm;
+	Steps steps_mm;
 	steps_mm.l = mm;
 	steps_mm.r = mm;
-	//steps = mm2enc(steps_mm);
 
 	// run & wait
 	SetSpeed_mm(100, 100);
