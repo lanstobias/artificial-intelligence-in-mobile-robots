@@ -80,7 +80,7 @@ void MoveSetSpeedSleep(double mm)
 	steps = mm2enc(steps_mm);
 
 	// run & wait
-	SetSpeed(100, 100);
+	SetSpeed_mm(100, 100);
 	long wait = (steps.l/100) * 1000; // calculation is not correct
 	Sleep(wait);
 
