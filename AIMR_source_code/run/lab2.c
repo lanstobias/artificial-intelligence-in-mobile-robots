@@ -1,23 +1,6 @@
 #include "interface.h"
 #include "lab2.h"
 
-// only a test purpose
-void Turn2(double degrees)
-{
-	ClearSteps();
-
-	Steps steps, steps_mm;
-	double arc;
-
-	arc = degrees/360*PI*ROBOT_DIAMETER;
-
-	steps_mm.l = (int)rint(arc);
-	steps_mm.r = (int)rint(arc);
-	steps = mm2enc(steps_mm);
-
-	SetTargetSteps(-(steps.l), steps.r);
-}
-
 //==============================================================================//
 //                          Helper funciton (read)                              //
 //==============================================================================//
@@ -114,8 +97,6 @@ void lab2()
 	ClearSteps();
 	printf("Lab 2..\n\n");
 	print_position();
-
-	Turn2(360);
 
 	update_position();
   print_position();
