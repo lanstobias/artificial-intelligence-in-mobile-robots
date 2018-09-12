@@ -1,9 +1,9 @@
 #include "interface.h"
 #include "lab2.h"
 
-//==============================================================================//
-//                          Helper funciton (read)                              //
-//==============================================================================//
+//==========================================================================//
+//                          Helper funciton (read)                          //
+//==========================================================================//
 Steps read_displacement_of_wheels()
 {
 	Steps steps, steps_mm;
@@ -17,9 +17,9 @@ Steps read_displacement_of_wheels()
     return steps_mm;
 }
 
-//==============================================================================//
-//                      Helper funciton (calculate)                             //
-//==============================================================================//
+//==========================================================================//
+//                      Helper funciton (calculate)                         //
+//==========================================================================//
 Posture compute_relative_displacement(Steps steps_mm)
 {
     Posture posture_displacement;
@@ -40,9 +40,9 @@ Posture compute_relative_displacement(Steps steps_mm)
   return posture_displacement;
 }
 
-//==============================================================================//
-//                 Helper funciton (conversion + update)                        //
-//==============================================================================//
+//==========================================================================//
+//                 Helper funciton (conversion + update)                    //
+//==========================================================================//
 void convert_to_global_values(Posture posture_old, Posture relative_displacement)
 {
   Posture posture_new;
@@ -66,9 +66,9 @@ void convert_to_global_values(Posture posture_old, Posture relative_displacement
   SetPosture(posture_new.x, posture_new.y, posture_new.th);
 }
 
-//==============================================================================//
-//                             Position Update                                  //
-//==============================================================================//
+//==========================================================================//
+//                             Position Update                              //
+//==========================================================================//
 void update_position()
 {
     Posture posture_old = GetPosture();
@@ -80,18 +80,18 @@ void update_position()
     ClearSteps();
 }
 
-//==============================================================================//
-//                             Print Position                                   //
-//==============================================================================//
+//==========================================================================//
+//                             Print Position                               //
+//==========================================================================//
 void print_position()
 {
     Posture posture = GetPosture();
     printf("Position: x: %f, y: %f, th: %f\n", posture.x, posture.y, posture.th);
 }
 
-//==============================================================================//
-//                                   Lab 2                                      //
-//==============================================================================//
+//==========================================================================//
+//                                   Lab 2                                  //
+//==========================================================================//
 void lab2()
 {
 	ClearSteps();
@@ -99,19 +99,19 @@ void lab2()
 	print_position();
 
 	update_position();
-  print_position();
+  	print_position();
 
-  for (int i = 0; i < 10; i++)
-  {
-      SetTargetSteps(100, 140);
-      update_position();
-      print_position();
-		}
+	for (int i = 0; i < 10; i++)
+  	{
+    	SetTargetSteps(100, 140);
+    	update_position();
+    	print_position();
+	}
 
-  SetSpeed(250, 500);
+	SetSpeed(250, 500);
 
-  for (int i = 0; i < 1000; i++)
-  {
+	for (int i = 0; i < 1000; i++)
+	{
 		update_position();
 		print_position();
 		Sleep(100);
