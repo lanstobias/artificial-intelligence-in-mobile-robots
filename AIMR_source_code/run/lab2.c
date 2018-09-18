@@ -30,8 +30,6 @@ Posture compute_relative_displacement(Steps steps_mm)
 	// Compute d and delta
 	float d = (d_r + d_l) / 2;
 	posture_displacement.th = ((d_r - d_l) / ROBOT_DIAMETER);
-	float twopi = 2*PI;
-	posture_displacement.th=fmodf(posture_displacement.th, twopi);
 
 	// Compute d_x, d_y
 	posture_displacement.x = (d * cos(posture_displacement.th / 2));
@@ -77,7 +75,7 @@ void update_position()
     Posture posture_displacement = compute_relative_displacement(steps_mm);
     convert_to_global_values(posture_old, posture_displacement);
 
-    ClearSteps();
+    //ClearSteps();
 }
 
 //==========================================================================//
