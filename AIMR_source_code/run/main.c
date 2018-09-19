@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
 
 	//example();
 	//lab1();
-	//lab2();
-	lab3();
+	lab2();
+	//lab3();
 
 	printf("Done...\n");
 

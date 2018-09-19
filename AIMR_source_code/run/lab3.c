@@ -11,52 +11,23 @@ Posture compute_distance_to_goal(float xt, float yt)
 	Posture distance_to_goal_xy;
 	Posture robot_temp_posture = GetPosture();
 	
-	distance_to_goal_xy.x = (xt - robot_temp_posture.x);
-	distance_to_goal_xy.y = (yt - robot_temp_posture.y);
+	distance_to_goal_xy.x = fabsf(xt - robot_temp_posture.x);
+	distance_to_goal_xy.y = fabsf(yt - robot_temp_posture.y);
 
 	return distance_to_goal_xy;
 }
 
 float convert_distance_to_mm(Posture distance_to_goal_xy)
 {
-	return (float)sqrt((pow(distance_to_goal_xy.x, 2) + (pow(distance_to_goal_xy.y, 2))));
+	return sqrtf((powf(distance_to_goal_xy.x, 2) + (powf(distance_to_goal_xy.y, 2))));
 }
 
-float law_of_cos(float a, float b, float c)
-{
-	return acos((pow(a, 2) + pow(b, 2) - pow(c, 2)) / (2 * a * b));
-}
-
-float calculate_Eth_old(Posture distance_to_goal_xy, float Epos, float xt, float yt)
-{
-	Posture goal_posture;
-	float distance_to_robot, distance_to_goal, angle_C;
-	
-	goal_posture.x = xt;
-	goal_posture.y = yt;
-	
-	distance_to_robot = convert_distance_to_mm(GetPosture());
-	distance_to_goal = convert_distance_to_mm(goal_posture);
-	
-	angle_C = law_of_cos(distance_to_robot, Epos, distance_to_goal);
-	
-	return (PI - angle_C);	
-}
-
-float calculate_Eth_old2(Posture distance_to_goal_xy, float Epos)
-{
-	float alpha, beta;
-
-	alpha = asin(distance_to_goal_xy.x / Epos);
-	beta = ((PI / 2) - alpha);
-	printf("Alpha: %f Beta: %f\n", alpha, beta);
-
-	return (GetPosture().th + beta);
-}
- 
 float calculate_Eth(Posture distance_to_goal_xy)
 {
-	return (normalizeAngle((atan2(distance_to_goal_xy.y, distance_to_goal_xy.x) - GetPosture().th)));
+    float angle = (normalizeAngle((atan2f(distance_to_goal_xy.y, distance_to_goal_xy.x) - GetPosture().th)));
+    //DEBUG printf("calculate_Eth angle: %f\n", angle);
+
+    return angle;
 }
  
 float normalizeAngle(float angle)
@@ -73,10 +44,11 @@ float normalizeAngle(float angle)
 	return angle;
 }
 
-Speed calculateVelocity_angle(float Kp_th, float Eth)
+Velocity calculateVelocity_angle(float Kp_th, float Eth)
 {
-	Speed turn;
+	Velocity turn;
 
+    /*
 	if (Eth > 0)
 	{
 		turn.r = (int)((Kp_th * Eth) + 110);
@@ -85,17 +57,19 @@ Speed calculateVelocity_angle(float Kp_th, float Eth)
 	{
 		turn.r = (int)(((-Kp_th) * Eth) - 110);
 	}
+    */
 	
-	turn.l = (int)((-1) * (turn.r));
+    turn.r = -(Kp_th * Eth);
+	turn.l = (turn.r);
 	
 	return turn; 
 }
 
-Speed calculateVelocity_distance(float Kp_pos, float Epos)
+Velocity calculateVelocity_distance(float Kp_pos, float Epos)
 {
-	Speed move;
+	Velocity move;
 	
-	move.r = (int)((Kp_pos * Epos) + 100);
+	move.r = (int)((Kp_pos * Epos));
 
 	if (move.r > 1000)
 	{
@@ -109,7 +83,7 @@ Speed calculateVelocity_distance(float Kp_pos, float Epos)
 
 void GoTo_DaC(float xt, float yt)
 {
-	Speed velocity;
+	Velocity velocity;
 	Posture distance_to_goal_xy;
 	float Eth, Epos;
 	
@@ -122,37 +96,23 @@ void GoTo_DaC(float xt, float yt)
 		
 		if (fabsf(Eth) > delta_th)
 		{
-			velocity=calculateVelocity_angle(Kp_th, Eth); 
-
-			/*
-			if (abs(Eth) > PI)
-			{
-				velocity.l = -100;
-				velocity.r = 100;
-			}
-			else
-			{
-				velocity.l = 100;
-				velocity.r = -100;
-			}
-			*/
+			velocity = calculateVelocity_angle(Kp_th, Eth); 
+            SetPolarSpeed(0, velocity.r);
+            printf("Turning: velocity.l: %f velocity.r: %f\n", velocity.l, velocity.r);
 		}
 		else
 		{
-			velocity = calculateVelocity_distance(Kp_pos, Epos);
-			//velocity.l = 1000;
-			//velocity.r = 1000;
+	        velocity = calculateVelocity_distance(Kp_pos, Epos);
+            SetPolarSpeed(velocity.r, 0);
+            printf("Moving: velocity.l: %f velocity.r: %f\n", velocity.l, velocity.r);
 		}
 
-		printf("Velocity.l: %d velocity.r: %d\n", velocity.l, velocity.r);
-		SetSpeed(velocity.l, velocity.r);
-
-		//SetSpeed(100, -100);
 		Sleep(1);
 
 		printf("Epos: %f delta_pos: %f\n", Epos, delta_pos);
 		printf("Eth: %f delta_th: %f\n\n", Eth, delta_th);
-	} while (abs(Epos) > delta_pos);
+		printf("th: %f, x:%f, y:%f\n", GetPosture().th, GetPosture().x, GetPosture().y);
+	} while (fabsf(Epos) > delta_pos);
 
 	Stop();
 }
@@ -164,16 +124,18 @@ void GoTo_MEMO()
 
 void lab3()
 {
-	//ClearSteps();
+    ClearSteps();
 	printf("Test lab3\n\n");
 
-	Kp_pos = 1;
-	Kp_th = 1;
-	delta_pos = 10; 
-	delta_th = (PI / 4);
+	Kp_pos = 0.05;
+	Kp_th = 0.5;
+	delta_pos = 50.0; 
+	delta_th = (float)(PI / 12);
 
-	float xt = 40;
-	float yt = 10;
+	float xt = 500;
+	float yt = 500;
 
-	GoTo_DaC(xt, yt);
+    SetPolarSpeed(50, 2.25);
+
+	// GoTo_DaC(xt, yt);
 }
