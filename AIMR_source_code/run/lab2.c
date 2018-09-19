@@ -2,21 +2,24 @@
 #include "lab2.h"
 #include "lab3.h"
 
+Posture posture_old;
+
 //==========================================================================//
 //                          Helper funciton (read)                          //
 //==========================================================================//
 Steps read_displacement_of_wheels()
 {
-	Steps steps, steps_mm;
-
+	Steps steps, steps_mm, temp_steps, steps_diff;
+	
 	// Read new step motor values
 	steps = GetSteps();
-
-    ClearSteps();
+	
+	ClearSteps();
 
 	// Convert d_l, d_r to mm
 	steps_mm = enc2mm(steps);
 
+	printf("steps_mm.l: %d, steps_mm.r: %d\n", steps_mm.l, steps_mm.r);
 
     return steps_mm;
 }
@@ -32,7 +35,7 @@ Posture compute_relative_displacement(Steps steps_mm)
 	int d_l = steps_mm.l;
 
 	// Compute d and delta)
-	float d = (float)((d_r + d_l) / 2);
+	float d = ((float)(d_r + d_l) / 2);
 	posture_displacement.th = ( (float)(d_r - d_l) / ROBOT_DIAMETER );
 
 	// Compute d_x, d_y
@@ -51,7 +54,7 @@ Posture compute_relative_displacement(Steps steps_mm)
 //==========================================================================//
 //                 Helper funciton (conversion + update)                    //
 //==========================================================================//
-void convert_to_global_values(Posture posture_old, Posture relative_displacement)
+void convert_to_global_values(Posture relative_displacement)
 {
     Posture posture_new;
 
@@ -71,6 +74,9 @@ void convert_to_global_values(Posture posture_old, Posture relative_displacement
 
 	// write new postures
     SetPosture(posture_new.x, posture_new.y, posture_new.th);
+    posture_old.x = posture_new.x;
+    posture_old.y = posture_new.y;
+    posture_old.th = posture_new.th;
 }
 
 //==========================================================================//
@@ -78,12 +84,9 @@ void convert_to_global_values(Posture posture_old, Posture relative_displacement
 //==========================================================================//
 void update_position()
 {
-    Posture posture_old = GetPosture();
-
     Steps steps_mm = read_displacement_of_wheels();
     Posture posture_displacement = compute_relative_displacement(steps_mm);
-    convert_to_global_values(posture_old, posture_displacement);
-
+    convert_to_global_values(posture_displacement);
 }
 
 //==========================================================================//
@@ -101,6 +104,9 @@ void print_position()
 void lab2()
 {
     SetPosture(0, 0, 0);
+    posture_old.x = 0;
+    posture_old.y = 0;
+    posture_old.th = 0;
 
 	ClearSteps();
 	printf("Lab 2..\n\n");
@@ -118,12 +124,12 @@ void lab2()
 	}
     */
 
-	SetSpeed(250, 500);
+	SetPolarSpeed(100, 0.75);
 
-	for (int i = 0; i < 1000; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		update_position();
 		print_position();
-		Sleep(100);
+		Sleep(10);
 	}
 }

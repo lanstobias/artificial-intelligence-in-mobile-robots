@@ -6,6 +6,7 @@
 //==============================================================================//
 void Move(double mm)
 {
+	Steps temp_steps = GetSteps();
 	ClearSteps();
 
 	// convert mm to steps
@@ -13,11 +14,16 @@ void Move(double mm)
 	steps_mm.l=mm;
 	steps_mm.r=mm;
 	steps = mm2enc(steps_mm);
-	printf("steps: %d\n", steps.l);
 
 	SetTargetSteps(steps.l,steps.r);
-
-	printf("\nMoved %d steps left and %d steps right.\n", GetSteps().l, GetSteps().r);
+	Steps moved_steps = GetSteps();
+	Steps moved_steps_mm;
+	moved_steps_mm = enc2mm(moved_steps);
+	printf("\nMoved %d mm on left wheel and %d mm on right wheel.\n", moved_steps_mm.l, moved_steps_mm.r);
+	
+	temp_steps.l += moved_steps.l;
+	temp_steps.r += moved_steps.r;
+	SetSteps(temp_steps.l, temp_steps.r);
 }
 
 //==============================================================================//
@@ -25,6 +31,7 @@ void Move(double mm)
 //==============================================================================//
 void Turn(double degrees)
 {
+	Steps temp_steps = GetSteps();
 	ClearSteps();
 
 	// calculate arc of circle in mm
@@ -39,6 +46,14 @@ void Turn(double degrees)
 
 	// rotate around its own axis
 	SetTargetSteps(-(steps.l), steps.r);
+	Steps moved_steps = GetSteps();
+	Steps moved_steps_mm;
+	moved_steps_mm = enc2mm(moved_steps);
+	printf("\nTurned %d mm on left wheel and %d mm on right wheel.\n", moved_steps_mm.l, moved_steps_mm.r);
+	
+	//temp_steps.l += moved_steps.l;
+	//temp_steps.r += moved_steps.r;
+	SetSteps(temp_steps.l, temp_steps.r);
 }
 
 //==============================================================================//
@@ -59,10 +74,8 @@ void MoveSetSpeed(double mm)
 	SetSpeed(500, 500);
 	while(steps.l >= abs(GetSteps().l))
 	{
-		printf("Current step value: %d\n", GetSteps().l);
+		
 	}
-
-	printf("Current step value: %d\n", GetSteps().l);
 	Stop();
 }
 

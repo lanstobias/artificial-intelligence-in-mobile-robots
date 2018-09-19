@@ -5,7 +5,7 @@
 
 Steps read_displacement_of_wheels();
 Posture compute_relative_displacement(Steps steps_mm);
-void convert_to_global_values(Posture posture_old, Posture relative_displacement);
+void convert_to_global_values(Posture relative_displacement);
 void update_position();
 void print_position();
 

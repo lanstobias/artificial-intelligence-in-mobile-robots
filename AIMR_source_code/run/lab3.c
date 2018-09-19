@@ -1,4 +1,5 @@
 #include "interface.h"
+#include "lab1.h"
 #include "lab2.h"
 #include "lab3.h"
 
@@ -86,13 +87,19 @@ void GoTo_DaC(float xt, float yt)
 	Velocity velocity;
 	Posture distance_to_goal_xy;
 	float Eth, Epos;
-	
-	do {
+	double degrees;
+	Posture temp_posture;
+			
+	while (fabsf(Epos) > delta_pos) {
 		update_position();
 
+	
 		distance_to_goal_xy = compute_distance_to_goal(xt, yt);
+		
 		Epos = convert_distance_to_mm(distance_to_goal_xy);
+		
 		Eth = calculate_Eth(distance_to_goal_xy);
+		/*
 		
 		if (fabsf(Eth) > delta_th)
 		{
@@ -103,16 +110,27 @@ void GoTo_DaC(float xt, float yt)
 		else
 		{
 	        velocity = calculateVelocity_distance(Kp_pos, Epos);
-            SetPolarSpeed(velocity.r, 0);
+	        SetSpeed(velocity.l, velocity.r);
+            //SetPolarSpeed(velocity.r, 0);
             printf("Moving: velocity.l: %f velocity.r: %f\n", velocity.l, velocity.r);
 		}
 
-		Sleep(1);
-
+		/*
+		
+		* * */
+		MoveSetSpeed(122);
+		//SetSpeed(500, 500);
+		
+		
+		//update_position();
 		printf("Epos: %f delta_pos: %f\n", Epos, delta_pos);
 		printf("Eth: %f delta_th: %f\n\n", Eth, delta_th);
-		printf("th: %f, x:%f, y:%f\n", GetPosture().th, GetPosture().x, GetPosture().y);
-	} while (fabsf(Epos) > delta_pos);
+		printf("dX: %f dY: %f\n", distance_to_goal_xy.x, distance_to_goal_xy.y);
+		temp_posture = GetPosture();
+		printf("th: %f, x:%f, y:%f\n", temp_posture.th, temp_posture.x, temp_posture.y);
+		
+		
+	};
 
 	Stop();
 }
@@ -127,15 +145,15 @@ void lab3()
     ClearSteps();
 	printf("Test lab3\n\n");
 
-	Kp_pos = 0.05;
+	Kp_pos = 5;
 	Kp_th = 0.5;
-	delta_pos = 50.0; 
+	delta_pos = 10.0; 
 	delta_th = (float)(PI / 12);
 
-	float xt = 500;
-	float yt = 500;
+	float xt = 130;
+	float yt = 0;
 
-    SetPolarSpeed(50, 2.25);
+    //SetPolarSpeed(50, 2.25);
 
-	// GoTo_DaC(xt, yt);
+	GoTo_DaC(xt, yt);
 }
