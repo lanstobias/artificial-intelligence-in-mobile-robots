@@ -31,8 +31,6 @@ Steps read_displacement_of_wheels()
 	// Convert dL, dR to mm
 	steps_mm = enc2mm(steps);
 
-	//printf("steps_mm.l: %d, steps_mm.r: %d\n", steps_mm.l, steps_mm.r);
-
   return steps_mm;
 }
 
@@ -80,26 +78,26 @@ float normalizeAngle(float angle)
 //==========================================================================//
 void convert_to_global_values(Posture relative_displacement)
 {
-  Posture posture_new;
+	Posture posture_new;
 
 	// Save previous robot position as x0, y0, th0
 	float x0 = posture_old.x;
-  float y0 = posture_old.y;
-  float th0 = posture_old.th;
+	float y0 = posture_old.y;
+	float th0 = posture_old.th;
 
 	// Compute new robot position x, y, th
-  float dx = relative_displacement.x;
-  float dy = relative_displacement.y;
-  float dth = relative_displacement.th;
+	float dx = relative_displacement.x;
+	float dy = relative_displacement.y;
+	float dth = relative_displacement.th;
 
-  posture_new.x = x0 + dx * cos(th0) - dy * sin(th0);
-  posture_new.y = y0 + dx * sin(th0) + dy * cos(th0);
-  posture_new.th = normalizeAngle(th0 + dth);
+	posture_new.x = x0 + dx * cos(th0) - dy * sin(th0);
+	posture_new.y = y0 + dx * sin(th0) + dy * cos(th0);
+	posture_new.th = normalizeAngle(th0 + dth);
 
 	// Write new posture
-  SetPosture(posture_new.x, posture_new.y, posture_new.th);
+	SetPosture(posture_new.x, posture_new.y, posture_new.th);
 	// Update old posture
-  posture_old = GetPosture();
+	posture_old = GetPosture();
 }
 
 //==========================================================================//
@@ -108,7 +106,7 @@ void convert_to_global_values(Posture relative_displacement)
 void update_position()
 {
 	/* Read displacement of right and left wheels */
-  Steps steps_mm = read_displacement_of_wheels();
+	Steps steps_mm = read_displacement_of_wheels();
 
 	/* Compute relative displacement at origin */
 	Posture posture_displacement = compute_relative_displacement(steps_mm);
@@ -123,7 +121,7 @@ void update_position()
 void print_position()
 {
     Posture posture = GetPosture();
-		float degree = posture.th * 180/PI;
+	float degree = posture.th * 180/PI;
     printf("Position: x: %f, y: %f, th: %f, degree: %f\n", posture.x, posture.y, posture.th, degree);
 }
 
@@ -136,7 +134,6 @@ void lab2()
 
 	printf("Lab 2..\n\n");
 
-	//SetPolarSpeed(100, 0.75);
 	print_position();
 	printf("\n");
 

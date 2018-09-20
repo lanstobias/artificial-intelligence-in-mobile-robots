@@ -26,7 +26,6 @@ float convert_distance_to_mm(Posture distance_to_goal_xy)
 float calculate_Eth(Posture distance_to_goal_xy)
 {
     float angle = (normalizeAngle((atan2f(distance_to_goal_xy.y, distance_to_goal_xy.x) - GetPosture().th)));
-    //DEBUG printf("calculate_Eth angle: %f\n", angle);
 
     return angle;
 }
@@ -35,17 +34,6 @@ float calculate_Eth(Posture distance_to_goal_xy)
 Velocity calculateVelocity_angle(float Kp_th, float Eth)
 {
 	Velocity turn;
-
-    /*
-	if (Eth > 0)
-	{
-		turn.r = (int)((Kp_th * Eth) + 110);
-	}
-	else
-	{
-		turn.r = (int)(((-Kp_th) * Eth) - 110);
-	}
-    */
 
     turn.r = -(Kp_th * Eth);
 	turn.l = (turn.r);
@@ -74,51 +62,20 @@ void GoTo_DaC(float xt, float yt)
 	Velocity velocity;
 	Posture distance_to_goal_xy;
 	float Eth, Epos;
-	double degrees;
-	Posture temp_posture;
 
-	while (fabsf(Epos) > delta_pos) {
+	do{
 		update_position();
-
-
+		
 		distance_to_goal_xy = compute_distance_to_goal(xt, yt);
 
 		Epos = convert_distance_to_mm(distance_to_goal_xy);
 
 		Eth = calculate_Eth(distance_to_goal_xy);
-		/*
+		
 
-		if (fabsf(Eth) > delta_th)
-		{
-			velocity = calculateVelocity_angle(Kp_th, Eth);
-            SetPolarSpeed(0, velocity.r);
-            printf("Turning: velocity.l: %f velocity.r: %f\n", velocity.l, velocity.r);
-		}
-		else
-		{
-	        velocity = calculateVelocity_distance(Kp_pos, Epos);
-	        SetSpeed(velocity.l, velocity.r);
-            //SetPolarSpeed(velocity.r, 0);
-            printf("Moving: velocity.l: %f velocity.r: %f\n", velocity.l, velocity.r);
-		}
+	} while(fabsf(Epos) > delta_pos);
 
-		/*
-
-		* * */
-		MoveSetSpeed(122);
-		//SetSpeed(500, 500);
-
-
-		//update_position();
-		printf("Epos: %f delta_pos: %f\n", Epos, delta_pos);
-		printf("Eth: %f delta_th: %f\n\n", Eth, delta_th);
-		printf("dX: %f dY: %f\n", distance_to_goal_xy.x, distance_to_goal_xy.y);
-		temp_posture = GetPosture();
-		printf("th: %f, x:%f, y:%f\n", temp_posture.th, temp_posture.x, temp_posture.y);
-
-
-	};
-
+	printf("Goal has been reached.\n");
 	Stop();
 }
 
@@ -140,7 +97,6 @@ void lab3()
 	float xt = 130;
 	float yt = 0;
 
-    //SetPolarSpeed(50, 2.25);
 
 	GoTo_DaC(xt, yt);
 }
