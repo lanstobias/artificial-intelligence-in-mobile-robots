@@ -137,8 +137,10 @@ void lab2()
 	printf("Lab 2..\n\n");
 
 	//SetPolarSpeed(100, 0.75);
+	print_position();
+	printf("\n");
 
-	for (int i = 0; i < 15; i++)
+	for (int i = 0; i < 14; i++)
 	{
 		if (i<3) {
 			printf("Move straight ahead (Speed: 300)\n");
