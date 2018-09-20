@@ -5,23 +5,35 @@
 Posture posture_old;
 
 //==========================================================================//
+//                    Helper funciton (init postures)                       //
+//==========================================================================//
+void init_postures() {
+
+	SetPosture(0, 0, 0);
+	posture_old.x = 0;
+	posture_old.y = 0;
+	posture_old.th = 0;
+
+	ClearSteps();
+}
+
+//==========================================================================//
 //                          Helper funciton (read)                          //
 //==========================================================================//
 Steps read_displacement_of_wheels()
 {
-	Steps steps, steps_mm, temp_steps, steps_diff;
-	
+	Steps steps, steps_mm;
 	// Read new step motor values
 	steps = GetSteps();
-	
+	// Clear steps
 	ClearSteps();
-
-	// Convert d_l, d_r to mm
+	// Compute difference dL, dR with previous values (GetSteps())
+	// Convert dL, dR to mm
 	steps_mm = enc2mm(steps);
 
-	printf("steps_mm.l: %d, steps_mm.r: %d\n", steps_mm.l, steps_mm.r);
+	//printf("steps_mm.l: %d, steps_mm.r: %d\n", steps_mm.l, steps_mm.r);
 
-    return steps_mm;
+  return steps_mm;
 }
 
 //==========================================================================//
@@ -29,26 +41,38 @@ Steps read_displacement_of_wheels()
 //==========================================================================//
 Posture compute_relative_displacement(Steps steps_mm)
 {
-    Posture posture_displacement;
+  Posture posture_displacement;
 
-	int d_r = steps_mm.r;
-	int d_l = steps_mm.l;
+	int dR = steps_mm.r;
+	int dL = steps_mm.l;
 
-	// Compute d and delta)
-	float d = ((float)(d_r + d_l) / 2);
-	posture_displacement.th = ( (float)(d_r - d_l) / ROBOT_DIAMETER );
+	// Compute d and delta as above
+	float d = (float)((dR + dL) / 2);
+	float delta = (float)((dR - dL) / ROBOT_DIAMETER);
+	// Compute Cartesian  displacement dx, dy
+	posture_displacement.x = (float)(d * cos(delta / 2));
+	posture_displacement.y = (float)(d * sin(delta / 2));
+	posture_displacement.th = delta;
 
-	// Compute d_x, d_y
-	posture_displacement.x = (d * cos(posture_displacement.th / 2));
-	posture_displacement.y = (d * sin(posture_displacement.th / 2));
+  return posture_displacement;
+}
 
-    // DEBUG -->
-    printf("\ncompute_relative_displacement():\n");
-    printf("d: %f, pd.th: %f, pd.x %f, pd.y %f:\n",
-           d, posture_displacement.th, posture_displacement.x, posture_displacement.y);
-    // <--
+//==========================================================================//
+//                 Helper funciton (angle normalization)                    //
+//==========================================================================//
+float normalizeAngle(float angle)
+{
+	// Range is from -PI to PI
+	if (angle >= PI)
+	{
+		angle -= (PI * 2);
+	}
+	else if (angle < (-PI))
+	{
+		angle += (PI * 2);
+	}
 
-    return posture_displacement;
+	return angle;
 }
 
 //==========================================================================//
@@ -56,27 +80,26 @@ Posture compute_relative_displacement(Steps steps_mm)
 //==========================================================================//
 void convert_to_global_values(Posture relative_displacement)
 {
-    Posture posture_new;
+  Posture posture_new;
 
-    float d_x = relative_displacement.x;
-    float d_y = relative_displacement.y;
-    float delta = relative_displacement.th;
+	// Save previous robot position as x0, y0, th0
+	float x0 = posture_old.x;
+  float y0 = posture_old.y;
+  float th0 = posture_old.th;
 
-    float x_0 = posture_old.x;
-    float y_0 = posture_old.y;
-    float th_0 = posture_old.th;
+	// Compute new robot position x, y, th
+  float dx = relative_displacement.x;
+  float dy = relative_displacement.y;
+  float dth = relative_displacement.th;
 
-    posture_new.x = x_0 + d_x * cos(th_0) - d_y * sin(th_0);
-    posture_new.y = y_0 + d_x * sin(th_0) + d_y * cos(th_0);
-    posture_new.th = th_0 + delta;
+  posture_new.x = x0 + dx * cos(th0) - dy * sin(th0);
+  posture_new.y = y0 + dx * sin(th0) + dy * cos(th0);
+  posture_new.th = normalizeAngle(th0 + dth);
 
-    posture_new.th = normalizeAngle(posture_new.th);
-
-	// write new postures
-    SetPosture(posture_new.x, posture_new.y, posture_new.th);
-    posture_old.x = posture_new.x;
-    posture_old.y = posture_new.y;
-    posture_old.th = posture_new.th;
+	// Write new posture
+  SetPosture(posture_new.x, posture_new.y, posture_new.th);
+	// Update old posture
+  posture_old = GetPosture();
 }
 
 //==========================================================================//
@@ -84,9 +107,14 @@ void convert_to_global_values(Posture relative_displacement)
 //==========================================================================//
 void update_position()
 {
-    Steps steps_mm = read_displacement_of_wheels();
-    Posture posture_displacement = compute_relative_displacement(steps_mm);
-    convert_to_global_values(posture_displacement);
+	/* Read displacement of right and left wheels */
+  Steps steps_mm = read_displacement_of_wheels();
+
+	/* Compute relative displacement at origin */
+	Posture posture_displacement = compute_relative_displacement(steps_mm);
+
+	/* Convert to global coordinates */
+	convert_to_global_values(posture_displacement);
 }
 
 //==========================================================================//
@@ -95,7 +123,8 @@ void update_position()
 void print_position()
 {
     Posture posture = GetPosture();
-    printf("Position: x: %f, y: %f, th: %f\n", posture.x, posture.y, posture.th);
+		float degree = posture.th * 180/PI;
+    printf("Position: x: %f, y: %f, th: %f, degree: %f\n", posture.x, posture.y, posture.th, degree);
 }
 
 //==========================================================================//
@@ -103,33 +132,38 @@ void print_position()
 //==========================================================================//
 void lab2()
 {
-    SetPosture(0, 0, 0);
-    posture_old.x = 0;
-    posture_old.y = 0;
-    posture_old.th = 0;
+	init_postures();
 
-	ClearSteps();
 	printf("Lab 2..\n\n");
-	print_position();
 
-	update_position();
-  	print_position();
+	//SetPolarSpeed(100, 0.75);
 
-    /*
-	for (int i = 0; i < 10; i++)
-  	{
-    	SetTargetSteps(100, 140);
-    	update_position();
-    	print_position();
-	}
-    */
-
-	SetPolarSpeed(100, 0.75);
-
-	for (int i = 0; i < 10000; i++)
+	for (int i = 0; i < 15; i++)
 	{
+		if (i<3) {
+			printf("Move straight ahead (Speed: 300)\n");
+			SetSpeed(300, 300);
+		}
+		if (i>=3 && i<6) {
+			if (i==3) printf("\n\n");
+			printf("Move only with right wheel (Speed: 300)\n");
+			SetSpeed(0, 300);
+		}
+		if (i>=6 && i<9) {
+			if (i==6) printf("\n\n");
+			printf("Move straight ahead (Speed: 300)\n");
+			SetSpeed(300, 300);
+		}
+		if (i>=9) {
+			if (i==9) printf("\n\n");
+			printf("Turn by Speed(100, -100)\n");
+			SetSpeed(100, -100);
+		}
+
 		update_position();
 		print_position();
-		Sleep(10);
+		Sleep(100);
 	}
+
+	Stop();
 }

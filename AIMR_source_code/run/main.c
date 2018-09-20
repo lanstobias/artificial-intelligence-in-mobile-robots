@@ -22,25 +22,25 @@ int main(int argc, char *argv[])
 	printf("Initial position:\n");
 	update_position();
 	print_position();
-	
+
 	printf("Moving 120 mm forward...\n");
 	Move(120);
-	
+
 	update_position();
 	print_position();
-	
+
 	printf("Turning 90 degrees...\n");
 	Turn(90);
-	
+
 	update_position();
 	print_position();
-	
+
 	printf("Moving 120 mm forward...\n");
 	Move(120);
-	
+
 	update_position();
 	print_position();
-	 
+
 	update_position();
 	print_position();
 	printf("Moving 120 mm with movesetspeed");
@@ -48,13 +48,13 @@ int main(int argc, char *argv[])
 	update_position();
 	print_position();
 	* */
-	
+
 	//example();
 	//lab1();
-	//lab2();
-	lab3();
+	lab2();
+	//lab3();
 
-	printf("Done...\n");
+	printf("\n\nDone...\n");
 
 	return (0);
  }
