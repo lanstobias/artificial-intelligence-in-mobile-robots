@@ -4,7 +4,7 @@
 #include "lab2.h"
 #include "lab3.h"
 
-#define ROBOT_NUMBER "4"
+#define ROBOT_NUMBER "15"
 
 
 //==============================================================================//
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	//example();
 	//lab1();
 	//lab2();
-	//lab3();
+	lab3();
 
 	printf("\n\nDone...\n");
 

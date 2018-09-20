@@ -6,13 +6,13 @@ typedef struct
     float r, l;
 } Velocity;
 
-Posture compute_distance_to_goal(float xt, float yt);
+void compute_difference_to_target_point(float xt, float yt, float* dx, float* dy);
 void GoTo_DaC(float xt, float yt);
-void GoTo_MEMO();
+float calculate_epos(float dx, float dy);
 void lab3();
 Velocity calculateVelocity_angle(float Kp_th, float Eth);
 Velocity calculateVelocity_distance(float Kp_pos, float Epos);
-float calculate_Eth(Posture distance_to_goal_xy);
+float calculate_Eth(float dx, float dy);
 float normalizeAngle(float angle);
 
 #endif
