@@ -14,5 +14,7 @@ Velocity calculateVelocity_angle(float Kp_th, float Eth);
 Velocity calculateVelocity_distance(float Kp_pos, float Epos);
 float calculate_Eth(float dx, float dy);
 float normalizeAngle(float angle);
+void Track();
+void printRobotValues(Velocity velocity, float Epos, float Eth);
 
 #endif
