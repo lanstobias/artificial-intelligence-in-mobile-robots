@@ -57,17 +57,13 @@ Velocity calculateVelocity_angle(float Kp_th, float Eth)
     turn.r = (Kp_th * Eth);
 
     //Limit max and min speeds - positive turn values
-    if (turn.r>950)
-    turn.r=950;
-    if (turn.r < 200)
-    turn.r=200;
+    if (turn.r>250)
+    turn.r=250;
 
     //Limit max and min speeds - negative turn values
-    if (turn.r<0 && turn.r<-950)
-    turn.r=-950;
+    if (turn.r<0 && turn.r<-250)
+    turn.r=-250;
 
-    if (turn.r<0 && turn.r > -200)
-    turn.r=-200;
 
 	turn.l = -(turn.r);
 
@@ -87,7 +83,12 @@ Velocity calculateVelocity_distance(float Kp_pos, float Epos)
 	{
 		move.r = 1000;
 	}
-
+	/*
+	if (move.r < 200)
+	{
+		move.r=200;
+	}
+*/
 	move.l = move.r;
 
 	return move;
@@ -101,42 +102,60 @@ void GoTo_DaC(float xt, float yt)
 	Velocity velocity;
 	float dx,dy;
 	float Eth, Epos;
-	do{
-		//Compute current robot position (xr, yr)
+	while(1)
+	{
 		update_position();
-		print_position();
 
+		//Compute current robot position (xr, yr)
+		
 		//Compute distances to goal (dx, dy)
 		compute_difference_to_target_point(xt, yt, &dx, &dy);
 
 		//Convert (dx,dy) to errors (Eth, Epos)
 		Epos = calculate_epos(dx,dy);
-
+		if (fabsf(Epos) <= delta_pos)
+		{
+			update_position();
+			break;
+		}
 		Eth = calculate_Eth(dx,dy);
+		print_position();
+		printf("Velocity.l: %f, velocity.r: %f\n", velocity.l, velocity.r);
+		printf("Eth: %f, Eth_degrees: %f, delta_th: %f, delta_th_degrees: %f\n", Eth, (Eth * 180/PI), delta_th, (delta_th * 180/PI));
+		printf("Epos: %f, Delta_pos: %f\n\n", Epos, delta_pos);
 
 		if (fabsf(Eth) > delta_th)
 		{
 			velocity=calculateVelocity_angle(Kp_th, Eth);
-			SetSpeed(velocity.l, velocity.r);
-			//SetPolarSpeed(0,velocity.l);
-			// Turn
-
 		}
 		else if (fabsf(Epos) > delta_pos)
 		{
-			SetSpeed(500,500);
-
+			velocity=calculateVelocity_distance(Kp_pos, Epos);
 		}
+		SetSpeed(velocity.l, velocity.r);
+		Sleep(500);
 
-		printf("Velocity.l: %f, velocity.r: %f\n", velocity.l, velocity.r);
+	}
 
-
-		printf("Eth: %f, Eth_degrees: %f, delta_th: %f, delta_th_degrees: %f\n", Eth, (Eth * 180/PI), delta_th, (delta_th * 180/PI));
-		printf("Epos: %f, Delta_pos: %f\n\n", Epos, delta_pos);
-	} while(fabsf(Epos) > delta_pos);
-
-	printf("Goal has been reached.\n");
 	Stop();
+	printf("Goal has been reached.\n");
+
+	update_position();
+	//Compute current robot position (xr, yr)
+		
+	//Compute distances to goal (dx, dy)
+	compute_difference_to_target_point(xt, yt, &dx, &dy);
+
+	//Convert (dx,dy) to errors (Eth, Epos)
+	Epos = calculate_epos(dx,dy);
+	Eth = calculate_Eth(dx,dy);
+	printf("Final values after goal has been reached:\n ------------------------------------------\n\n");
+	print_position();
+	printf("Velocity.l: %f, velocity.r: %f\n", velocity.l, velocity.r);
+	printf("Eth: %f, Eth_degrees: %f, delta_th: %f, delta_th_degrees: %f\n", Eth, (Eth * 180/PI), delta_th, (delta_th * 180/PI));
+	printf("Epos: %f, Delta_pos: %f\n\n", Epos, delta_pos);
+	printf("------------------------------------------\n");
+	
 }
 
 //==========================================================================//
@@ -147,13 +166,13 @@ void lab3()
     ClearSteps();
 	printf("Test lab3\n\n");
 
-	Kp_pos = 5;
-	Kp_th = 200;
-	delta_pos = 10.0;
+	Kp_pos = 6;
+	Kp_th = 500;
+	delta_pos = 30.0;
 	delta_th = (float)(PI / 48);
 
-	float xt = 0;
-	float yt = 300;
+	float xt = -180;
+	float yt = 240;
 
 	//float dx, dy;
 	//compute_difference_to_target_point(xt, yt, &dx, &dy);
