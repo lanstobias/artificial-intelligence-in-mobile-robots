@@ -89,6 +89,10 @@ Velocity calculateVelocity_distance(float Kp_pos, float Epos)
 	{
 		move.r = 1000;
 	}
+	if (move.r < 75)
+	{
+		move.r = 75;
+	}
 
 	move.l = move.r;
 
@@ -209,17 +213,38 @@ void lab3()
     ClearSteps();
 	printf("Test lab3\n\n");
 
-	Kp_pos = 3;
+	Kp_pos = 10;
 	Kp_th = 500;
 	delta_pos = 30.0;
-	delta_th = (float)(PI / 36);
+	delta_th = (float)(PI / 24);
 
 	float xt = -180;
 	float yt = 240;
 	
 	int n = 4;
+	
+	//There and back again
+	/*
+	float xarray[10] = {240, 0, 0, 0};
+	float yarray[10] = {0, 0, 120, 0};
+	*/
+	//Small square movement
+	/*
 	float xarray[10] = {120, 120, 0, 0};
 	float yarray[10] = {0, 120, 120, 0};
+	*/
+	
+	//Big square movement
+	
+	float xarray[10] = {240, 240, 0, 0};
+	float yarray[10] = {0, 240, 240, 0};
+	
+	
+	//45 degree diamond
+	/*
+	float xarray[10] = {120, 0, -120, 0};
+	float yarray[10] = {120, 240, 120, 0};
+	*/
 	/*
 	for (int i=200; i>0; i-=10)
 	{
@@ -227,7 +252,7 @@ void lab3()
 		printf("Current spinning speed: %d\n", i);
 		Sleep(1000);
 	}
-	* */
+	*/
 	Track(xarray, yarray, n);
 	//GoTo_DaC(xt, yt);
 	//float dx, dy;
