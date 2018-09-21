@@ -3,66 +3,80 @@
 #include "lab2.h"
 #include "lab3.h"
 
+// Global variables
 float Kp_pos, Kp_th, delta_pos, delta_th;
 
-//Motivate in report why we use posture and not position (float vs double)
-
+//==========================================================================//
+//            Helper funciton (difference to target point)                  //
+//==========================================================================//
 void compute_difference_to_target_point(float xt, float yt, float* dx, float* dy)
 {
 	Posture robot_temp_posture = GetPosture();
 
+	// Using to pointer to "return" two parameters
 	*dx = (xt - robot_temp_posture.x);
 	*dy = (yt - robot_temp_posture.y);
 }
 
+//==========================================================================//
+//                  Helper funciton (calculate Epos)                        //
+//==========================================================================//
 float calculate_epos(float dx, float dy)
 {
 	float a2, b2, c;
-	
-	//Pythagoras: c = sqrt( a² + b²)
+
+	// Pythagoras: c = sqrt( a² + b²) || a² + b² = c²
 	a2 = powf(dx, 2);
 	b2 = powf(dy, 2);
 	c= sqrtf(a2 + b2);
-	
+
 	return c;
 }
 
+//==========================================================================//
+//                    Helper funciton (calculate Eth)                       //
+//==========================================================================//
 float calculate_Eth(float dx, float dy)
 {
     float angle;
-    
+
     angle = atan2f(dy, dx);
     angle -= GetPosture().th;
-    angle = normalizeAngle(angle);  
-     
+    angle = normalizeAngle(angle);
+
     return angle;
 }
- 
 
+//==========================================================================//
+//           Helper funciton (calculate velocity based on angle)            //
+//==========================================================================//
 Velocity calculateVelocity_angle(float Kp_th, float Eth)
 {
 	Velocity turn;
 
     turn.r = (Kp_th * Eth);
-    
+
     //Limit max and min speeds - positive turn values
     if (turn.r>950)
     turn.r=950;
     if (turn.r < 200)
     turn.r=200;
-    
+
     //Limit max and min speeds - negative turn values
     if (turn.r<0 && turn.r<-950)
     turn.r=-950;
-    
+
     if (turn.r<0 && turn.r > -200)
     turn.r=-200;
-    
+
 	turn.l = -(turn.r);
 
 	return turn;
 }
 
+//==========================================================================//
+//           Helper funciton (calculate velocity based on distance)         //
+//==========================================================================//
 Velocity calculateVelocity_distance(float Kp_pos, float Epos)
 {
 	Velocity move;
@@ -79,6 +93,9 @@ Velocity calculateVelocity_distance(float Kp_pos, float Epos)
 	return move;
 }
 
+//==========================================================================//
+//                              GoTo funciton                               //
+//==========================================================================//
 void GoTo_DaC(float xt, float yt)
 {
 	Velocity velocity;
@@ -88,32 +105,32 @@ void GoTo_DaC(float xt, float yt)
 		//Compute current robot position (xr, yr)
 		update_position();
 		print_position();
-		
+
 		//Compute distances to goal (dx, dy)
 		compute_difference_to_target_point(xt, yt, &dx, &dy);
 
 		//Convert (dx,dy) to errors (Eth, Epos)
 		Epos = calculate_epos(dx,dy);
-		
+
 		Eth = calculate_Eth(dx,dy);
-		
+
 		if (fabsf(Eth) > delta_th)
 		{
 			velocity=calculateVelocity_angle(Kp_th, Eth);
 			SetSpeed(velocity.l, velocity.r);
 			//SetPolarSpeed(0,velocity.l);
 			// Turn
-			
+
 		}
 		else if (fabsf(Epos) > delta_pos)
 		{
 			SetSpeed(500,500);
-			
+
 		}
 
 		printf("Velocity.l: %f, velocity.r: %f\n", velocity.l, velocity.r);
-		
-		
+
+
 		printf("Eth: %f, Eth_degrees: %f, delta_th: %f, delta_th_degrees: %f\n", Eth, (Eth * 180/PI), delta_th, (delta_th * 180/PI));
 		printf("Epos: %f, Delta_pos: %f\n\n", Epos, delta_pos);
 	} while(fabsf(Epos) > delta_pos);
@@ -122,7 +139,9 @@ void GoTo_DaC(float xt, float yt)
 	Stop();
 }
 
-
+//==========================================================================//
+//                                 lab3                                     //
+//==========================================================================//
 void lab3()
 {
     ClearSteps();
@@ -135,11 +154,11 @@ void lab3()
 
 	float xt = 0;
 	float yt = 300;
-	
+
 	//float dx, dy;
 	//compute_difference_to_target_point(xt, yt, &dx, &dy);
 
-	
+
 	/*
 	int i=0;
 	SetSpeed(500, 1000);
@@ -153,7 +172,7 @@ void lab3()
 		}
 		Sleep(5);
 	}
-	
+
 	*/
 	/*
 	Eth=calculate_Eth(dx, dy);
@@ -163,44 +182,44 @@ void lab3()
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	
+
 	xt=0;
 	yt=120;
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	
+
 	xt=-120;
 	yt=120;
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	
+
 	xt=-120;
 	yt=0;
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	
+
 	xt=-120;
 	yt=-120;
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	
+
 	xt=0;
 	yt=-120;
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	
+
 	xt=120;
 	yt=-120;
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
 	*/
-	
+
 	/*
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
@@ -210,7 +229,7 @@ void lab3()
 	compute_difference_to_target_point(xt, yt, &dx, &dy);
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	
+
 	float Epos;
 	Eth=calculate_Eth(dx, dy);
 	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));

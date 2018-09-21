@@ -137,6 +137,7 @@ void lab2()
 	print_position();
 	printf("\n");
 
+	// Test-Scenario
 	for (int i = 0; i < 14; i++)
 	{
 		if (i<3) {
