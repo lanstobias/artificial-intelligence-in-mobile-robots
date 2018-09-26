@@ -4,44 +4,38 @@
 #include "lab3.h"
 #include "lab4.h"
 
-// Rotational velocity rules: IF(stimulus); ROT(value)
-enum dir{LEFT = -1, RIGHT = 1, AHEAD = 0};
-enum vel{BACK = -1, NONE = 0, SLOW = 1, FAST = 2};
+#define VMAX 1000
+#define VMIN 75
+
+float dx,dy;
+FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here;
+int vel, rot;
 
 // vlin, vrot & ante
-float vlin, vrot, ante, delta_pos, err_th, err_pos;
+int final_speed, final_rotation_speed;
+double delta_position, err_th, err_pos;
 
-// ‘IF’ is a macro that sets the value of ‘ante’ 
-#define IF(form) (ante = (form))
+FSet vlin, vrot;
 
 // ‘NOT’, ‘AND’ and ‘OR’ are macros that compute truth values
-#define NOT(form) (1.0 - (form)) 
-#define AND(f1, f2) ((f1) * (f2)) 
-#define OR(f1, f2) ((f1) + (f2) - ((f1) * (f2)))
+// #define NOT(form) (1.0 - (form)) 
+// #define AND(f1, f2) ((f1) * (f2)) 
+// #define OR(f1, f2) ((f1) + (f2) - ((f1) * (f2)))
 
 // ‘IF’ is a macro that sets the value of ‘ante’ 
-#define IF(form) (ante = (form))
+//#define IF(form) (ante = (form))
 
 // ‘VEL’ and ‘ROT’ are macros that set the value of ‘vlin’ and ‘vrot’
-#define VEL(value) (if (ante > 0.0) vlin = value) 
-#define ROT(value) (if (ante > 0.0) vrot = value)
-
-// ‘RULESET’ is a macro that initializes all values 
-#define RULESET vlin = NONE; vrot = AHEAD
-
-// Define a danger threshold
-//#define DangerThreshold 0
-
+//#define VEL(value) (if (ante > 0.0) vlin = value) 
+//#define ROT(value) (if (ante > 0.0) vrot = value)
 
 //==========================================================================//
-//                       GoToRules funciton (Fuzzy Logic)                        //
+//                       GoToRules funciton (Fuzzy Logic)                   //
 //==========================================================================//
-void GoToRules (float xt, float yt) { 
- 
-    float dx,dy;
-    FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here;
-
+void GoToRules (float xt, float yt)
+{ 
     // First part: computation of the needed variables // 
+
     // err_th, err_pos computed as in good old GoTo() //
     /* ----- Paste & Copy lab3 ------ */
         //  Compute distances to goal (dx, dy)
@@ -51,21 +45,13 @@ void GoToRules (float xt, float yt) {
         // rename variables to fit frame of lab4
         err_pos = calculate_epos(dx,dy);	
         err_th = calculate_Eth(dx,dy);
-     /* ----- Paste & Copy lab3 ------ */
+    /* ----- Paste & Copy lab3 ------ */
 
     // Second part: truth computation of the predicates //
-    if (err_th > 10) Pos_Left = 1.0; 
-    else Pos_Left = 0.0;
-
-    if (err_th < -10) Pos_Right = 1.0; 
-    else Pos_Right = 0.0;
-
-    if (ABS(err_th) <= 10) Pos_Ahead = 1.0; 
-    else Pos_Ahead = 0.0;
-
-    if (err_pos < 20) Pos_Here = 1.0; 
-    else Pos_Here = 0.0;
-
+    Pos_Left = RampUp(err_th, 0, 60);
+    Pos_Right = RampDown(err_th, -60, 0);
+    Pos_Ahead = min(RampUp(err_th, -30, 0), RampDown(err_th, 0, 30));
+    Pos_Here = RampDown(err_pos, 10, 50);
 
     // Third part: the rules //
     RULESET;
@@ -75,42 +61,72 @@ void GoToRules (float xt, float yt) {
         
         IF(AND(Pos_Ahead, NOT(Pos_Here))); VEL(FAST); 
         IF(OR(Pos_Here, NOT(Pos_Ahead))); VEL(NONE);
-    RULEND;
+    RULEEND;
 };
 
 //==========================================================================//
 //                      Helper function (velocity)                          //
 //==========================================================================//
-reaction_to_vel (int vel) { switch (vel) { 
-    case BACK: return(-20); break; 
-    case NONE: return(0); break; 
-    case SLOW: return(20); break; 
-    case FAST: return(50); break; } 
+// result is a float between 0.0 and 1.0
+// convert it to in between VMIN and VMAX
+// similar for rot
+int ResponseToVel(float response)
+{
+    return (VMIN + response * (VMAX - VMIN));
+}
+
+//==========================================================================//
+//                      Helper function (velocity)                          //
+//==========================================================================//
+int reaction_to_vel (int vel)
+{
+    switch (vel)
+    {
+        case BACK: return(-20); break; 
+        case NONE: return(0); break; 
+        case SLOW: return(20); break; 
+        case FAST: return(50); break;
+    }
 }
 
 //==========================================================================//
 //                      Helper function (rotation)                          //
 //==========================================================================//
-reaction_to_rot (int vel) { switch (vel) { 
-    case BACK: return(-20); break; 
-    case NONE: return(0); break; 
-    case SLOW: return(20); break; 
-    case FAST: return(50); break; } 
+int reaction_to_rot (int rot)
+{ 
+    switch (rot)
+    { 
+        case BACK: return(-20); break; 
+        case NONE: return(0); break; 
+        case SLOW: return(20); break; 
+        case FAST: return(50); break;
+    }
 }
 
 //==========================================================================//
 //                      GoTo_FRB (Fuzzy Rule based)                         //
 //==========================================================================//
 void GoTo_FRB (float xt, float yt) { 
-
     while (1) {
+        // Compute current position
         update_position();
+
+        // Reset Fuzzy sets
+        ClearFSet(vlin);
+        ClearFSet(vrot);
+
+        // Run the behaviour
         GoToRules(xt, yt);
 
-        vlin = reaction_to_vel(vel); 
-        vrot = reaction_to_rot(rot); 
+        // Defuzzify and set rot/vel
+        DeFuzzify(vrot, 3, &rot);
+        DeFuzzify(vlin, 4, &vel);
+
+        final_speed = ResponseToVel(vel); 
+        final_rotation_speed = ResponseToRot(rot); 
         
-        SetPolarSpeed(vlin, vrot);
+        // Send commands to robot
+        SetPolarSpeed(final_speed, final_rotation_speed);
         Sleep(200);
 
         if (fabsf(err_pos) <= delta_pos)
@@ -177,11 +193,11 @@ void lab4 () {
     ClearSteps();
 	printf("Test lab4\n\n");
 
-	delta_pos = 30.0;
+	delta_position = 30.0;
 	//delta_th = (float)(PI / 24);
 
 	float xt = 240;
 	float yt = 0;
 
-    GoTo_FRB(xt, yt); 
+    // GoTo_FRB(xt, yt); 
 }
