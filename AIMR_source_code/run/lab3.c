@@ -109,9 +109,8 @@ void GoTo_DaC(float xt, float yt)
 	float Eth, Epos;
 	while(1)
 	{
-		update_position();
-
 		//Compute current robot position (xr, yr)
+		update_position();
 		
 		//Compute distances to goal (dx, dy)
 		compute_difference_to_target_point(xt, yt, &dx, &dy);
@@ -223,137 +222,10 @@ void lab3()
 	
 	int n = 4;
 	
-	//There and back again
-	/*
-	float xarray[10] = {240, 0, 0, 0};
-	float yarray[10] = {0, 0, 120, 0};
-	*/
-	//Small square movement
-	/*
-	float xarray[10] = {120, 120, 0, 0};
-	float yarray[10] = {0, 120, 120, 0};
-	*/
-	
-	//Big square movement
-	
 	float xarray[10] = {240, 240, 0, 0};
 	float yarray[10] = {0, 240, 240, 0};
 	
-	
-	//45 degree diamond
-	/*
-	float xarray[10] = {120, 0, -120, 0};
-	float yarray[10] = {120, 240, 120, 0};
-	*/
-	/*
-	for (int i=200; i>0; i-=10)
-	{
-		SetSpeed(-i, i);
-		printf("Current spinning speed: %d\n", i);
-		Sleep(1000);
-	}
-	*/
 	Track(xarray, yarray, n);
-	//GoTo_DaC(xt, yt);
-	//float dx, dy;
-	//compute_difference_to_target_point(xt, yt, &dx, &dy);
-
-
-	/*
-	int i=0;
-	SetSpeed(500, 1000);
-	while(1)
-	{
-		i +=1;
-		update_position();
-		if (i%10==0)
-		{
-			print_position();
-		}
-		Sleep(5);
-	}
-
-	*/
-	/*
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	xt=120;
-	yt=120;
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-
-	xt=0;
-	yt=120;
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-
-	xt=-120;
-	yt=120;
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-
-	xt=-120;
-	yt=0;
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-
-	xt=-120;
-	yt=-120;
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-
-	xt=0;
-	yt=-120;
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-
-	xt=120;
-	yt=-120;
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	*/
-
-	/*
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	Move(120);
-	update_position();
-	print_position();
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-
-	float Epos;
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	MoveSetSpeed(120);
-	update_position();
-	print_position();
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	SetSpeed(-400, 400);
-	Sleep(500);
-	update_position();
-	print_position();
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	MoveSetSpeed(120);
-	update_position();
-	print_position();
-	compute_difference_to_target_point(xt, yt, &dx, &dy);
-	Eth=calculate_Eth(dx, dy);
-	printf("Eth: %f, Eth_degrees: %f\n", Eth, (Eth * 180/PI));
-	*/
 
 	closeFile();
-	
 }
