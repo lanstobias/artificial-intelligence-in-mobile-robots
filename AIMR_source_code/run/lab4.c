@@ -71,11 +71,10 @@ int ResponseToVel(float response)
 
 int ResponseToRot(float response)
 {
-    if (response < 0)
+    if (vrot[RIGHT] > 0)
     {
         return (int)(-RMIN - response * (RMAX - RMIN));
     }
-
     return (int)(RMIN + response * (RMAX - RMIN));
 }
 
@@ -193,8 +192,8 @@ void lab4()
 	delta_position = 30.0;
 	//delta_th = (float)(PI / 24);
 
-	float xt = 240;
-	float yt = 240;
+	float xt = -200;
+	float yt = 0;
 
     GoTo_FRB(xt, yt); 
 }
