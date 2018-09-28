@@ -10,16 +10,16 @@ float dx,dy;
 double delta_position, err_th, err_pos;
 Velocity dummyVelocity;
 
-FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here;
+FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here, ante;
 FSet vlin, vrot;
 double vel, rot;
 int final_speed, final_rotation_speed;
 
 // Macros
-#define VMAX 1000
-#define VMIN 75
-#define RMAX 200
-#define RMIN 75
+#define VMAX 250
+#define VMIN 10
+#define RMAX 8
+#define RMIN 2
 
 #define AND(x,y) (((x) < (y)) ? (x) : (y))
 #define OR(x,y) (((x) < (y)) ? (y) : (x))
@@ -38,8 +38,11 @@ void GoToRules(float xt, float yt)
     // First part: computation of the needed variables
     compute_difference_to_target_point(xt, yt, &dx, &dy);
 
+    printf("err_th: %lf err_pos: %lf\n", err_th, err_pos);
+
     err_pos = calculate_epos(dx,dy);	
-    err_th = calculate_Eth(dx,dy);
+    //err_th = calculate_Eth(dx,dy);
+    err_th = ( (calculate_Eth(dx, dy) * 180.0) / M_PI );
 
     // Second part: truth computation of the predicates 
     Pos_Left = RampUp(err_th, 0, 60);
@@ -68,7 +71,26 @@ int ResponseToVel(float response)
 
 int ResponseToRot(float response)
 {
+    if (response < 0)
+    {
+        return (int)(-RMIN - response * (RMAX - RMIN));
+    }
+
     return (int)(RMIN + response * (RMAX - RMIN));
+}
+
+void printSets()
+{
+    printf("vlin[BACK]: %lf\n", vlin[BACK]);
+    printf("vlin[NONE]: %lf\n", vlin[NONE]);
+    printf("vlin[SLOW]: %lf\n", vlin[SLOW]);
+    printf("vlin[FAST]: %lf\n", vlin[FAST]);
+
+    printf("\n");
+    printf("vrot[LEFT]: %lf\n", vrot[LEFT]);
+    printf("vrot[AHEAD]: %lf\n", vrot[AHEAD]);
+    printf("vrot[RIGHT]: %lf\n", vrot[RIGHT]);
+    printf("\n---------------------------\n");
 }
 
 //==========================================================================//
@@ -94,9 +116,14 @@ void GoTo_FRB(float xt, float yt)
 
         final_speed = ResponseToVel(vel); 
         final_rotation_speed = ResponseToRot(rot); 
+
+        printf("vel: %d, rot: %d\n\n", vel, rot);
+        printf("final_speed: %d, final_rotation_speed: %d\n", final_speed, final_rotation_speed);
+        printSets();
         
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
+        //SetPolarSpeed(-200, 0);
         Sleep(200);
 
         if (fabsf(err_pos) <= delta_position)
@@ -117,7 +144,6 @@ void GoTo_FRB(float xt, float yt)
 	err_pos = calculate_epos(dx,dy);
 	err_th = calculate_Eth(dx,dy);
 	printf("---- Final values after goal has been reached: ---->\n");
-	printRobotValues(dummyVelocity, err_pos, err_th);
 }
 
 //==========================================================================//
@@ -168,7 +194,7 @@ void lab4()
 	//delta_th = (float)(PI / 24);
 
 	float xt = 240;
-	float yt = 0;
+	float yt = 240;
 
     GoTo_FRB(xt, yt); 
 }
