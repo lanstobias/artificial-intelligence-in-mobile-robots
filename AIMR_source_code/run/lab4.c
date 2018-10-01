@@ -20,8 +20,8 @@ double vel, rot, final_speed, final_rotation_speed;
 #define RMAX 3
 #define RMIN 0
 
-#define AND(x,y) (((x) < (y)) ? (x) : (y))
-#define OR(x,y) (((x) < (y)) ? (y) : (x))
+#define AND(x,y) (((x) < (y)) ? (x) : (y))  // min
+#define OR(x,y) (((x) < (y)) ? (y) : (x))   // max
 #define NOT(x) (1.0 - (x))
 
 #define IF(form) (ante = (form))
@@ -68,6 +68,9 @@ double ResponseToVel(float response)
     return (double)(VMIN + response * (VMAX - VMIN));
 }
 
+//==========================================================================//
+//                      Helper function (rotation)                          //
+//==========================================================================//
 double ResponseToRot(float response)
 {
     printf("response: %f\n", response);
@@ -80,6 +83,9 @@ double ResponseToRot(float response)
     return (double)(RMIN + response * (RMAX - RMIN));
 }
 
+//==========================================================================//
+//                             Debug function                               //
+//==========================================================================//
 void printSets()
 {
     printf("vlin[BACK]: %lf\n", vlin[BACK]);
@@ -94,6 +100,9 @@ void printSets()
     printf("\n---------------------------\n");
 }
 
+//==========================================================================//
+//                      Helper function (goal checker)                          //
+//==========================================================================//
 int goalReached()
 { 
     return (fabsf(err_pos) <= delta_position);
