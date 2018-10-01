@@ -2,6 +2,7 @@
 #define LAB4H
 
 void GoToRules(float xt, float yt);
+void AvoidRules();
 void GoTo_FRB(float xt, float yt);
 double ResponseToVel(float response);
 double ResponseToRot(float response);

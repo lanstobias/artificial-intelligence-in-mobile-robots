@@ -114,30 +114,29 @@ int goalReached()
 //==========================================================================//
 //                        AvoidRules function                           //
 //==========================================================================//
-/*void AvoidRules() { 
+void AvoidRules() { 
 
-    unsigned int ir[8]; 
     FPred Obs_Left, Obs_Right, Obs_Ahead;
 
     // First, read values of ir[0] ... ir[7] from the robot //
-    Sensors ir = GetSensors();
+    Sensors ir = GetIR();
 
     // Second, compute truth of predicates // 
-    ObsLeft = RampDown(max(ir[5],ir[6]), FullDanger, NoDanger); 
-    ObsRight = RampDown(max(ir[1],ir[2]), FullDanger, NoDanger); 
-    ObsAhead = RampDown(max(ir[0],ir[7]), FullDanger, NoDanger);
+    Obs_Left = RampDown(MAX(ir.sensor[5],ir.sensor[6]), FullDanger, NoDanger); 
+    Obs_Right = RampDown(MAX(ir.sensor[1],ir.sensor[2]), FullDanger, NoDanger); 
+    Obs_Ahead = RampDown(MAX(ir.sensor[0],ir.sensor[7]), FullDanger, NoDanger);
 
     // Third, the fuzzy rules //
     RULESET;
-        IF (AND(Obs_Left, NOT(Obs_Right))) ROT(RIGHT); 
-        IF (AND(Obs_Right, NOT(Obs_Left))) ROT(LEFT); 
-        IF (AND(Obs_Right, Obs_Left)) ROT(AHEAD);
+        IF (AND(Obs_Left, NOT(Obs_Right))); ROT(RIGHT); 
+        IF (AND(Obs_Right, NOT(Obs_Left))); ROT(LEFT); 
+        IF (AND(Obs_Right, Obs_Left)); ROT(AHEAD);
 
-        IF (Obs_Ahead) VEL(BACK); 
-        IF (AND(OR(Obs_Right, Obs_Left)), NOT(Obs_Ahead)) VEL(SLOW); 
-        IF (NOT(OR(OR(Obs_Right,Obs_Left), Obs_Ahead))) VEL(FAST);
-    RULEND;
-};*/
+        IF (Obs_Ahead); VEL(BACK); 
+        IF (AND(OR(Obs_Right, Obs_Left), NOT(Obs_Ahead))); VEL(SLOW); 
+        IF (NOT(OR(OR(Obs_Right,Obs_Left), Obs_Ahead))); VEL(FAST);
+    RULEEND;
+};
 
 //==========================================================================//
 //                      GoTo_FRB (Fuzzy Rule based)                         //
