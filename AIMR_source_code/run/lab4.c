@@ -9,10 +9,13 @@
 float dx,dy;
 double delta_position, err_th, err_pos;
 Velocity dummyVelocity;
-
 FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here, ante;
 FSet vlin, vrot;
 double vel, rot, final_speed, final_rotation_speed;
+
+// DangerThresholdS
+#define NoDanger 1500       // if reading above this, no danger 
+#define FullDanger 650      // if reading below this, max danger
 
 // Macros
 #define VMAX 250
@@ -109,6 +112,34 @@ int goalReached()
 }
 
 //==========================================================================//
+//                        AvoidRules function                           //
+//==========================================================================//
+/*void AvoidRules() { 
+
+    unsigned int ir[8]; 
+    FPred Obs_Left, Obs_Right, Obs_Ahead;
+
+    // First, read values of ir[0] ... ir[7] from the robot //
+    Sensors ir = GetSensors();
+
+    // Second, compute truth of predicates // 
+    ObsLeft = RampDown(max(ir[5],ir[6]), FullDanger, NoDanger); 
+    ObsRight = RampDown(max(ir[1],ir[2]), FullDanger, NoDanger); 
+    ObsAhead = RampDown(max(ir[0],ir[7]), FullDanger, NoDanger);
+
+    // Third, the fuzzy rules //
+    RULESET;
+        IF (AND(Obs_Left, NOT(Obs_Right))) ROT(RIGHT); 
+        IF (AND(Obs_Right, NOT(Obs_Left))) ROT(LEFT); 
+        IF (AND(Obs_Right, Obs_Left)) ROT(AHEAD);
+
+        IF (Obs_Ahead) VEL(BACK); 
+        IF (AND(OR(Obs_Right, Obs_Left)), NOT(Obs_Ahead)) VEL(SLOW); 
+        IF (NOT(OR(OR(Obs_Right,Obs_Left), Obs_Ahead))) VEL(FAST);
+    RULEND;
+};*/
+
+//==========================================================================//
 //                      GoTo_FRB (Fuzzy Rule based)                         //
 //==========================================================================//
 void GoTo_FRB(float xt, float yt)
@@ -124,6 +155,9 @@ void GoTo_FRB(float xt, float yt)
 
         // Run the behaviour
         GoToRules(xt, yt);
+
+        // run the AvoidObstacles
+        // AvoidRules();
 
         // Defuzzify and set rot/vel
         printf("rot before DeFuzzify(): %lf\n", rot);
@@ -162,39 +196,6 @@ void GoTo_FRB(float xt, float yt)
     Posture posture = GetPosture();
     printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
 }
-
-//==========================================================================//
-//                        AvoidObstacles function                           //
-//==========================================================================//
-/*
-void AvoidObstacles () { 
-    unsigned int ir[8]; 
-    FPred Obs_Left, Obs_Right, Obs_Ahead;
-
-    // First, read values of ir[0] ... ir[7] from the robot //
-    Sensors ir = GetSensors();
-    // Second, compute truth of predicates // 
-    if (ir[0] > DangerThreshold || ir[1] > DangerThreshold) Obs_Left = 1.0; 
-    else Obs_Left = 0.0;
-
-    if (ir[2] > DangerThreshold || ir[3] > DangerThreshold) Obs_Ahead = 1.0; 
-    else Obs_Ahead = 0.0;
-
-    if (ir[4] > DangerThreshold || ir[5] > DangerThreshold) Obs_Right = 1.0; 
-    else Obs_Right = 0.0;
-
-    // Third, here come the rules // 
-    RULESET;
-    IF (AND(Obs_Left, NOT(Obs_Right))); ROT(RIGHT); 
-    IF (AND(Obs_Right, NOT(Obs_Left))); ROT(LEFT); 
-    IF (AND(Obs_Right, Obs_Left)); ROT(AHEAD);
-    IF (Obs_Ahead); VEL(BACK); 
-    IF (AND(OR(Obs_Right, Obs_Left)), NOT(Obs_Ahead)); VEL(SLOW); 
-    IF (NOT(OR(OR(Obs_Right,Obs_Left), Obs_Ahead))); VEL(FAST);
-    RULEND; 
-};
-*/
-
 
 //==========================================================================//
 //                                lab4                                      //
