@@ -217,8 +217,8 @@ void lab3()
 	delta_pos = 30.0;
 	delta_th = (float)(PI / 24);
 
-	float xt = -180;
-	float yt = 240;
+	//float xt = -180;
+	//float yt = 240;
 	
 	int n = 4;
 	
