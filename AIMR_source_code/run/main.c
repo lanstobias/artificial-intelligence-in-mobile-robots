@@ -5,8 +5,7 @@
 #include "lab3.h"
 #include "lab4.h"
 
-#define ROBOT_NUMBER "1"
-
+#define ROBOT_NUMBER "6"
 
 //==============================================================================//
 //                                  main                                        //

@@ -14,14 +14,16 @@ FSet vlin, vrot;
 double vel, rot, final_speed, final_rotation_speed;
 
 // DangerThresholdS
-#define NoDanger 1500       // if reading above this, no danger 
-#define FullDanger 650      // if reading below this, max danger
+//#define NoDanger 306
+//#define FullDanger 2211
+#define NoDanger 2211
+#define FullDanger 306
 
 // Macros
-#define VMAX 250
+#define VMAX 75
 #define VMIN 0
-#define RMAX 3
-#define RMIN 0
+#define RMAX 2
+#define RMIN -2
 
 #define AND(x,y) (((x) < (y)) ? (x) : (y))  // min
 #define OR(x,y) (((x) < (y)) ? (y) : (x))   // max
@@ -78,12 +80,26 @@ double ResponseToRot(float response)
 {
     printf("response: %f\n", response);
 
-    if (vrot[RIGHT] > 0.0)
+    /*
+    if (vrot[RIGHT] > 0.001)
     {
+        printf("Turn right\n");
         return (double)(-RMIN - response * (RMAX - RMIN));
     }
+    else if (vrot[LEFT] > 0.001)
+    {
+        return (double)(RMIN + response * (RMAX - RMIN));
+    }
+    */
 
-    return (double)(RMIN + response * (RMAX - RMIN));
+    double return_value = (double)(RMIN + response * (RMAX - RMIN));
+
+    printf("rmin: %lf, rmax: %lf, return_value: %lf\n", RMIN, RMAX, return_value);
+
+    return return_value;
+
+    //printf("%d + %f * (%d - %d) = %lf\n", RMIN, response, RMAX, RMIN, return_value);
+    // printf("Turn left, return_value: %lf\n");
 }
 
 //==========================================================================//
@@ -111,20 +127,29 @@ int goalReached()
     return (fabsf(err_pos) <= delta_position);
 }
 
-//==========================================================================//
-//                        AvoidRules function                           //
-//==========================================================================//
-void AvoidRules() { 
+void print_ir_values(Sensors ir)
+{ 
+    for (int i = 0; i < 8; i++)
+    { 
+        printf("ir[%d]: %d\n", i, ir.sensor[i]);
+    }
+}
 
+//==========================================================================//
+//                        FollwoRules function                           //
+//==========================================================================//
+void FollowRules()
+{ 
     FPred Obs_Left, Obs_Right, Obs_Ahead;
 
     // First, read values of ir[0] ... ir[7] from the robot //
     Sensors ir = GetIR();
+    print_ir_values(ir);
 
     // Second, compute truth of predicates // 
-    Obs_Left = RampDown(MAX(ir.sensor[5],ir.sensor[6]), FullDanger, NoDanger); 
-    Obs_Right = RampDown(MAX(ir.sensor[1],ir.sensor[2]), FullDanger, NoDanger); 
-    Obs_Ahead = RampDown(MAX(ir.sensor[0],ir.sensor[7]), FullDanger, NoDanger);
+    Obs_Left = RampDown(MAX(ir.sensor[5], ir.sensor[6]), FullDanger, NoDanger); 
+    Obs_Right = RampDown(MAX(ir.sensor[1], ir.sensor[2]), FullDanger, NoDanger); 
+    Obs_Ahead = RampDown(MAX(ir.sensor[0], ir.sensor[7]), FullDanger, NoDanger);
 
     // Third, the fuzzy rules //
     RULESET;
@@ -136,6 +161,42 @@ void AvoidRules() {
         IF (AND(OR(Obs_Right, Obs_Left), NOT(Obs_Ahead))); VEL(SLOW); 
         IF (NOT(OR(OR(Obs_Right,Obs_Left), Obs_Ahead))); VEL(FAST);
     RULEEND;
+};
+
+//==========================================================================//
+//                        AvoidRules function                           //
+//==========================================================================//
+void AvoidRules()
+{ 
+    FPred Obs_Left, Obs_Right, Obs_Ahead;
+
+    // First, read values of ir[0] ... ir[7] from the robot //
+    Sensors ir = GetIR();
+    print_ir_values(ir);
+
+    // Second, compute truth of predicates // 
+    Obs_Left = RampDown(MAX(ir.sensor[5], ir.sensor[6]), FullDanger, NoDanger); 
+    Obs_Right = RampDown(MAX(ir.sensor[1], ir.sensor[2]), FullDanger, NoDanger); 
+    // Obs_Ahead = RampDown(MAX(ir.sensor[0], ir.sensor[7]), FullDanger, NoDanger);
+
+    //Obs_Left = RampUp(MAX(ir.sensor[5], ir.sensor[6]), NoDanger, FullDanger); 
+    //Obs_Right = RampUp(MAX(ir.sensor[1], ir.sensor[2]), NoDanger, FullDanger); 
+    Obs_Ahead = RampUp(MAX(ir.sensor[0], ir.sensor[7]), NoDanger, FullDanger);
+
+    printf("Obs_Left: %lf, Obs_Right: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
+
+    // Third, the fuzzy rules //
+    RULESET;
+        IF (AND(Obs_Left, NOT(Obs_Right))); ROT(RIGHT); 
+        IF (AND(Obs_Right, NOT(Obs_Left))); ROT(LEFT); 
+        IF (AND(Obs_Right, Obs_Left)); ROT(AHEAD);
+
+        IF (Obs_Ahead); VEL(BACK);
+        IF (AND(OR(Obs_Right, Obs_Left), NOT(Obs_Ahead))); VEL(SLOW);
+        IF (NOT(OR(OR(Obs_Right,Obs_Left), Obs_Ahead))); VEL(FAST);
+    RULEEND;
+
+    printf("ante: %lf\n", ante);
 };
 
 //==========================================================================//
@@ -152,11 +213,11 @@ void GoTo_FRB(float xt, float yt)
         ClearFSet(vlin);
         ClearFSet(vrot);
 
-        // Run the behaviour
-        GoToRules(xt, yt);
-
         // run the AvoidObstacles
-        // AvoidRules();
+        AvoidRules();
+
+        // Run the behaviour
+        //GoToRules(xt, yt);
 
         // Defuzzify and set rot/vel
         printf("rot before DeFuzzify(): %lf\n", rot);
@@ -173,6 +234,7 @@ void GoTo_FRB(float xt, float yt)
 
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
+
         Sleep(200);
     }
     while(!goalReached());
@@ -196,6 +258,32 @@ void GoTo_FRB(float xt, float yt)
     printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
 }
 
+void run_AvoidRules()
+{ 
+    while (1)
+    { 
+        // Reset Fuzzy sets
+        ClearFSet(vlin);
+        ClearFSet(vrot);
+
+        AvoidRules();
+        printSets();
+
+        DeFuzzify(vrot, 3, &rot);
+        DeFuzzify(vlin, 4, &vel);
+
+        final_speed = ResponseToVel(vel); 
+        final_rotation_speed = ResponseToRot(rot); 
+        printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
+        
+        SetPolarSpeed(final_speed, final_rotation_speed);
+
+        printf("---------------------------------\n");
+        Sleep(200);
+    }
+}
+
+
 //==========================================================================//
 //                                lab4                                      //
 //==========================================================================//
@@ -205,12 +293,13 @@ void lab4()
     rot = 0;
     vel = 0;
 	printf("Test lab4\n\n");
-
+    
 	delta_position = 25.0;
 	//delta_th = (float)(PI / 24);
 
-	float xt = -120.0;
-	float yt = -240;
+	float xt = 360.0;
+	float yt = 0.0;
 
-    GoTo_FRB(xt, yt); 
+    //GoTo_FRB(xt, yt); 
+    run_AvoidRules();
 }
