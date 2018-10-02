@@ -14,16 +14,19 @@ FSet vlin, vrot;
 double vel, rot, final_speed, final_rotation_speed;
 
 // DangerThresholdS
-//#define NoDanger 306
-//#define FullDanger 2211
-#define NoDanger 2211
-#define FullDanger 306
+#define NoDanger 3800
+#define FullDanger 600
 
 // Macros
-#define VMAX 75
-#define VMIN 0
-#define RMAX 2
-#define RMIN -2
+#define VMAX_GOTO 200
+#define VMIN_GOTO 0
+#define RMAX_GOTO 2
+#define RMIN_GOTO 0
+
+#define VMAX_AVOID 80
+#define VMIN_AVOID 0
+#define RMAX_AVOID 2
+#define RMIN_AVOID -2
 
 #define AND(x,y) (((x) < (y)) ? (x) : (y))  // min
 #define OR(x,y) (((x) < (y)) ? (y) : (x))   // max
@@ -68,37 +71,43 @@ void GoToRules(float xt, float yt)
 //==========================================================================//
 //                      Helper function (velocity)                          //
 //==========================================================================//
-double ResponseToVel(float response)
+double ResponseToVelAvoid(double response)
 {
-    return (double)(VMIN + response * (VMAX - VMIN));
+    return (double)(VMIN_AVOID + response * (VMAX_AVOID - VMIN_AVOID));
 }
 
 //==========================================================================//
-//                      Helper function (rotation)                          //
+//                      Helper function (velocity)                          //
 //==========================================================================//
-double ResponseToRot(float response)
+double ResponseToVelGoto(double response)
+{
+    return (double)(VMIN_GOTO + response * (VMAX_GOTO - VMIN_GOTO));
+}
+
+//==========================================================================//
+//                      Helper function (ResponseToRot avoid)               //
+//==========================================================================//
+double ResponseToRotAvoid(double response)
 {
     printf("response: %f\n", response);
 
-    /*
+    return (double)(RMIN_AVOID + response * (RMAX_AVOID - RMIN_AVOID));
+}
+
+//==========================================================================//
+//                      Helper function (ResponseToRot goto)                //
+//==========================================================================//
+double ResponseToRotGoto(double response)
+{
     if (vrot[RIGHT] > 0.001)
     {
-        printf("Turn right\n");
-        return (double)(-RMIN - response * (RMAX - RMIN));
+        return (double)(-RMIN_GOTO - response * (RMAX_GOTO - RMIN_GOTO));
     }
-    else if (vrot[LEFT] > 0.001)
-    {
-        return (double)(RMIN + response * (RMAX - RMIN));
-    }
-    */
 
-    double return_value = (double)(RMIN + response * (RMAX - RMIN));
+    return (double)(RMIN_GOTO + response * (RMAX_GOTO - RMIN_GOTO));
 
-    printf("rmin: %lf, rmax: %lf, return_value: %lf\n", RMIN, RMAX, return_value);
-
-    return return_value;
-
-    //printf("%d + %f * (%d - %d) = %lf\n", RMIN, response, RMAX, RMIN, return_value);
+    // printf("rmin: %lf, rmax: %lf, return_value: %lf\n", RMIN, RMAX, return_value);
+    // printf("%d + %f * (%d - %d) = %lf\n", RMIN, response, RMAX, RMIN, return_value);
     // printf("Turn left, return_value: %lf\n");
 }
 
@@ -120,7 +129,7 @@ void printSets()
 }
 
 //==========================================================================//
-//                      Helper function (goal checker)                          //
+//                      Helper function (goal checker)                      //
 //==========================================================================//
 int goalReached()
 { 
@@ -177,10 +186,6 @@ void AvoidRules()
     // Second, compute truth of predicates // 
     Obs_Left = RampDown(MAX(ir.sensor[5], ir.sensor[6]), FullDanger, NoDanger); 
     Obs_Right = RampDown(MAX(ir.sensor[1], ir.sensor[2]), FullDanger, NoDanger); 
-    // Obs_Ahead = RampDown(MAX(ir.sensor[0], ir.sensor[7]), FullDanger, NoDanger);
-
-    //Obs_Left = RampUp(MAX(ir.sensor[5], ir.sensor[6]), NoDanger, FullDanger); 
-    //Obs_Right = RampUp(MAX(ir.sensor[1], ir.sensor[2]), NoDanger, FullDanger); 
     Obs_Ahead = RampUp(MAX(ir.sensor[0], ir.sensor[7]), NoDanger, FullDanger);
 
     printf("Obs_Left: %lf, Obs_Right: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
@@ -213,11 +218,8 @@ void GoTo_FRB(float xt, float yt)
         ClearFSet(vlin);
         ClearFSet(vrot);
 
-        // run the AvoidObstacles
-        AvoidRules();
-
         // Run the behaviour
-        //GoToRules(xt, yt);
+        GoToRules(xt, yt);
 
         // Defuzzify and set rot/vel
         printf("rot before DeFuzzify(): %lf\n", rot);
@@ -225,8 +227,8 @@ void GoTo_FRB(float xt, float yt)
         DeFuzzify(vlin, 4, &vel);
         printf("rot after DeFuzzify(): %lf\n", rot);
 
-        final_speed = ResponseToVel(vel); 
-        final_rotation_speed = ResponseToRot(rot); 
+        final_speed = ResponseToVelGoto(vel); 
+        final_rotation_speed = ResponseToRotGoto(rot); 
 
         printf("vel: %lf, rot: %lf\n\n", vel, rot);
         printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
@@ -235,7 +237,7 @@ void GoTo_FRB(float xt, float yt)
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
 
-        Sleep(200);
+        Sleep(100);
     }
     while(!goalReached());
 
@@ -272,14 +274,14 @@ void run_AvoidRules()
         DeFuzzify(vrot, 3, &rot);
         DeFuzzify(vlin, 4, &vel);
 
-        final_speed = ResponseToVel(vel); 
-        final_rotation_speed = ResponseToRot(rot); 
+        final_speed = ResponseToVelAvoid(vel); 
+        final_rotation_speed = ResponseToRotAvoid(rot); 
         printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
         
         SetPolarSpeed(final_speed, final_rotation_speed);
 
         printf("---------------------------------\n");
-        Sleep(200);
+        Sleep(10);
     }
 }
 
@@ -293,13 +295,13 @@ void lab4()
     rot = 0;
     vel = 0;
 	printf("Test lab4\n\n");
-    
+
 	delta_position = 25.0;
 	//delta_th = (float)(PI / 24);
 
-	float xt = 360.0;
-	float yt = 0.0;
+	float xt = 240.0;
+	float yt = -240.0;
 
-    //GoTo_FRB(xt, yt); 
-    run_AvoidRules();
+    GoTo_FRB(xt, yt); 
+    //run_AvoidRules();
 }
