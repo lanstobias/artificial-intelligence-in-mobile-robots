@@ -125,6 +125,7 @@ void GoTo_DaC(float xt, float yt)
 			break;
 		}
 		printRobotValues(velocity, Epos, Eth);
+		printCoordinatesToFile(&filePointer);
 
 		if (fabsf(Eth) > delta_th)
 		{
@@ -170,7 +171,6 @@ void Track(float* xarray, float* yarray, int n)
 void printRobotValues(Velocity velocity, float Epos, float Eth)
 {
     Posture posture = GetPosture();
-    printCoordinatesToFile(posture);
     float angle_rad = posture.th;
     float angle_deg = angle_rad * (180.0 / M_PI);
     printf("Robot: x: %.1f, y: %.1f, rad: %.3f, deg: %.4f\n", posture.x, posture.y, angle_rad, angle_deg);
@@ -182,9 +182,9 @@ void printRobotValues(Velocity velocity, float Epos, float Eth)
 
 
 
-void openFile()
+void openFile(FILE** filePointer)
 {
-	filePointer = fopen("robot_values.csv", "w");
+	*filePointer = fopen("robot_values.csv", "w");
 	if (filePointer == NULL)
 	{
 		printf("Error opening file.\n");
@@ -192,14 +192,15 @@ void openFile()
 	}
 }
 
-void printCoordinatesToFile(Posture posture)
+void printCoordinatesToFile(FILE** filePointer)
 {
-	fprintf(filePointer, "%f,%f\n", posture.x, posture.y);
+	Posture posture = GetPosture();
+	fprintf(*filePointer, "%f,%f\n", posture.x, posture.y);
 }
 
-void closeFile()
+void closeFile(FILE** filePointer)
 {
-	fclose(filePointer);
+	fclose(*filePointer);
 }
 
 
@@ -208,7 +209,7 @@ void closeFile()
 //==========================================================================//
 void lab3()
 {	
-	openFile();
+	openFile(&filePointer);
     ClearSteps();
 	printf("Test lab3\n\n");
 
@@ -227,5 +228,5 @@ void lab3()
 	
 	Track(xarray, yarray, n);
 
-	closeFile();
+	closeFile(&filePointer);
 }

@@ -12,18 +12,21 @@ Velocity dummyVelocity;
 FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here, ante;
 FSet vlin, vrot;
 double vel, rot, final_speed, final_rotation_speed;
+FILE* fp;
 
 // DangerThresholdS
 #define NoDanger 3800
 #define FullDanger 600
 
 // Macros
-#define VMAX_GOTO 200
+// Goto
+#define VMAX_GOTO 250
 #define VMIN_GOTO 0
-#define RMAX_GOTO 2
+#define RMAX_GOTO 3
 #define RMIN_GOTO 0
 
-#define VMAX_AVOID 80
+// Avoid
+#define VMAX_AVOID 100
 #define VMIN_AVOID 0
 #define RMAX_AVOID 2
 #define RMIN_AVOID -2
@@ -99,16 +102,38 @@ double ResponseToRotAvoid(double response)
 //==========================================================================//
 double ResponseToRotGoto(double response)
 {
-    if (vrot[RIGHT] > 0.001)
+    double return_value;
+    printf("response: %f\n", response);
+
+    // Turn right
+    if (response > 0.5)
     {
-        return (double)(-RMIN_GOTO - response * (RMAX_GOTO - RMIN_GOTO));
+        printf("Turning right..\n");
+        return_value = (double)(-RMIN_GOTO - response * (RMAX_GOTO - RMIN_GOTO));
+        printf("rmin: %d, rmax: %d, return_value: %lf\n", RMIN_GOTO, RMAX_GOTO, return_value);
+        printf("%d + %f * (%d - %d) = %lf\n", RMIN_GOTO, response, RMAX_GOTO, RMIN_GOTO, return_value);
+        return return_value;
     }
 
-    return (double)(RMIN_GOTO + response * (RMAX_GOTO - RMIN_GOTO));
+    // Turn ahead
+    if (response == 0.5)
+    {
+        printf("No turn..\n");
+        return 0;
+    }
 
-    // printf("rmin: %lf, rmax: %lf, return_value: %lf\n", RMIN, RMAX, return_value);
-    // printf("%d + %f * (%d - %d) = %lf\n", RMIN, response, RMAX, RMIN, return_value);
-    // printf("Turn left, return_value: %lf\n");
+    // Turn left
+    if (response < 0.5)
+    {
+        printf("Turn left..\n");
+        return_value = (double)(RMIN_GOTO + (1.0 - response) * (RMAX_GOTO - RMIN_GOTO));
+        return return_value;
+    }
+
+    printf("rmin: %d, rmax: %d, return_value: %lf\n", RMIN_GOTO, RMAX_GOTO, return_value);
+    printf("%d + %f * (%d - %d) = %lf\n", RMIN_GOTO, response, RMAX_GOTO, RMIN_GOTO, return_value);
+
+    return 0;
 }
 
 //==========================================================================//
@@ -213,6 +238,8 @@ void GoTo_FRB(float xt, float yt)
     {
         // Compute current position
         update_position();
+        
+        printCoordinatesToFile(&fp);
 
         // Reset Fuzzy sets
         ClearFSet(vlin);
@@ -222,10 +249,9 @@ void GoTo_FRB(float xt, float yt)
         GoToRules(xt, yt);
 
         // Defuzzify and set rot/vel
-        printf("rot before DeFuzzify(): %lf\n", rot);
+
         DeFuzzify(vrot, 3, &rot);
         DeFuzzify(vlin, 4, &vel);
-        printf("rot after DeFuzzify(): %lf\n", rot);
 
         final_speed = ResponseToVelGoto(vel); 
         final_rotation_speed = ResponseToRotGoto(rot); 
@@ -236,8 +262,9 @@ void GoTo_FRB(float xt, float yt)
 
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
+        //SetPolarSpeed(100, 2);
 
-        Sleep(100);
+        Sleep(200);
     }
     while(!goalReached());
 
@@ -262,8 +289,12 @@ void GoTo_FRB(float xt, float yt)
 
 void run_AvoidRules()
 { 
-    while (1)
+    int i = 0;
+    while (i < 300)
     { 
+        update_position();
+        printCoordinatesToFile(&fp);
+
         // Reset Fuzzy sets
         ClearFSet(vlin);
         ClearFSet(vrot);
@@ -281,10 +312,19 @@ void run_AvoidRules()
         SetPolarSpeed(final_speed, final_rotation_speed);
 
         printf("---------------------------------\n");
-        Sleep(10);
+        Sleep(100);
+        i++;
     }
 }
 
+void FuzzyTrack(float* xarray, float* yarray, int n)
+{
+	for (int i=0; i< n; i++)
+	{
+		GoTo_FRB(xarray[i], yarray[i]);
+	}
+	
+}
 
 //==========================================================================//
 //                                lab4                                      //
@@ -300,8 +340,19 @@ void lab4()
 	//delta_th = (float)(PI / 24);
 
 	float xt = 240.0;
-	float yt = -240.0;
+	float yt = 240.0;
 
-    GoTo_FRB(xt, yt); 
-    //run_AvoidRules();
+	//int n = 4;
+	
+	//float xarray[10] = {240, 240, 0, 0};
+	//float yarray[10] = {0, 240, 240, 0};
+
+    //openFile(&fp);
+    //GoTo_FRB(xt, yt); 
+    //FuzzyTrack(xarray, yarray, n);
+    //closeFile(&fp);
+
+    openFile(&fp);
+    run_AvoidRules();
+    closeFile(&fp);
 }

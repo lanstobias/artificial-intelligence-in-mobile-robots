@@ -16,8 +16,8 @@ float calculate_Eth(float dx, float dy);
 float normalizeAngle(float angle);
 void Track();
 void printRobotValues(Velocity velocity, float Epos, float Eth);
-void openFile();
-void printCoordinatesToFile(Posture posture);
-void closeFile();
+void openFile(FILE** filePointer);
+void printCoordinatesToFile(FILE** filePointer);
+void closeFile(FILE** filePointer);
 
 #endif

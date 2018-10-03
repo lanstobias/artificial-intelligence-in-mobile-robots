@@ -6,7 +6,7 @@ def read_robot_csv():
     return np.genfromtxt('robot_values.csv', delimiter=',')
 
 def plot_values():
-    plt.axis([-50, 300, -50, 300])
+    plt.axis([-100, 500, -400, 300])
     #fig=plt.figure()
     #fig.suptitle('ePuck Movement', fontsize=20)
 
