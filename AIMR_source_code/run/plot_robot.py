@@ -7,8 +7,6 @@ def read_robot_csv():
 
 def plot_values():
     plt.axis([-100, 500, -400, 300])
-    #fig=plt.figure()
-    #fig.suptitle('ePuck Movement', fontsize=20)
 
     robot_coordinates = np.array(read_robot_csv())
     x, y = robot_coordinates.T
@@ -16,7 +14,6 @@ def plot_values():
     plt.xlabel('mm', fontsize=18)
     plt.ylabel('mm', fontsize=16)
     plt.grid()
-    #fig.savefig('ePuckmovementlab3.jpg')
     plt.show()
    
 

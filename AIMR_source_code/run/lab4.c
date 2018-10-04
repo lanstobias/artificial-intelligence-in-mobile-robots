@@ -20,9 +20,9 @@ FILE* fp;
 
 // Macros
 // Goto
-#define VMAX_GOTO 250
+#define VMAX_GOTO 1000
 #define VMIN_GOTO 0
-#define RMAX_GOTO 3
+#define RMAX_GOTO 12
 #define RMIN_GOTO 0
 
 // Avoid
@@ -41,7 +41,7 @@ FILE* fp;
 #define ROT(y) if (vrot[(y)] < ante) vrot[(y)] = ante
 
 //==========================================================================//
-//                       GoToRules funciton (Fuzzy Logic)                   //
+//                       GoToRules function (Fuzzy Logic)                   //
 //==========================================================================//
 void GoToRules(float xt, float yt)
 { 
@@ -72,7 +72,7 @@ void GoToRules(float xt, float yt)
 };
 
 //==========================================================================//
-//                      Helper function (velocity)                          //
+//                      Response to velocity (Avoid obsticle)               //
 //==========================================================================//
 double ResponseToVelAvoid(double response)
 {
@@ -80,7 +80,7 @@ double ResponseToVelAvoid(double response)
 }
 
 //==========================================================================//
-//                      Helper function (velocity)                          //
+//                      Response to velocity (GoTo)                         //
 //==========================================================================//
 double ResponseToVelGoto(double response)
 {
@@ -88,56 +88,39 @@ double ResponseToVelGoto(double response)
 }
 
 //==========================================================================//
-//                      Helper function (ResponseToRot avoid)               //
+//                      ResponseToRot (Avoid obsticle)                      //
 //==========================================================================//
 double ResponseToRotAvoid(double response)
 {
-    printf("response: %f\n", response);
-
     return (double)(RMIN_AVOID + response * (RMAX_AVOID - RMIN_AVOID));
 }
 
 //==========================================================================//
-//                      Helper function (ResponseToRot goto)                //
+//                      ResponseToRot (GoTo)                                //
 //==========================================================================//
 double ResponseToRotGoto(double response)
 {
-    double return_value;
-    printf("response: %f\n", response);
-
     // Turn right
     if (response > 0.5)
     {
-        printf("Turning right..\n");
-        return_value = (double)(-RMIN_GOTO - response * (RMAX_GOTO - RMIN_GOTO));
-        printf("rmin: %d, rmax: %d, return_value: %lf\n", RMIN_GOTO, RMAX_GOTO, return_value);
-        printf("%d + %f * (%d - %d) = %lf\n", RMIN_GOTO, response, RMAX_GOTO, RMIN_GOTO, return_value);
-        return return_value;
+        return (double)(-RMIN_GOTO - response * (RMAX_GOTO - RMIN_GOTO));
     }
-
     // Turn ahead
     if (response == 0.5)
     {
-        printf("No turn..\n");
         return 0;
     }
-
     // Turn left
     if (response < 0.5)
     {
-        printf("Turn left..\n");
-        return_value = (double)(RMIN_GOTO + (1.0 - response) * (RMAX_GOTO - RMIN_GOTO));
-        return return_value;
+        return (double)(RMIN_GOTO + (1.0 - response) * (RMAX_GOTO - RMIN_GOTO));
     }
-
-    printf("rmin: %d, rmax: %d, return_value: %lf\n", RMIN_GOTO, RMAX_GOTO, return_value);
-    printf("%d + %f * (%d - %d) = %lf\n", RMIN_GOTO, response, RMAX_GOTO, RMIN_GOTO, return_value);
 
     return 0;
 }
 
 //==========================================================================//
-//                             Debug function                               //
+//                         Debug function printSets                         //
 //==========================================================================//
 void printSets()
 {
@@ -154,13 +137,16 @@ void printSets()
 }
 
 //==========================================================================//
-//                      Helper function (goal checker)                      //
+//                      Debug function (goal checker)                      //
 //==========================================================================//
 int goalReached()
 { 
     return (fabsf(err_pos) <= delta_position);
 }
 
+//==========================================================================//
+//                      Debug function (print IR-values)                    //
+//==========================================================================//
 void print_ir_values(Sensors ir)
 { 
     for (int i = 0; i < 8; i++)
@@ -170,7 +156,7 @@ void print_ir_values(Sensors ir)
 }
 
 //==========================================================================//
-//                        FollwoRules function                           //
+//                        FollwoRules function                              //
 //==========================================================================//
 void FollowRules()
 { 
@@ -198,7 +184,7 @@ void FollowRules()
 };
 
 //==========================================================================//
-//                        AvoidRules function                           //
+//                        AvoidRules function                               //
 //==========================================================================//
 void AvoidRules()
 { 
@@ -233,7 +219,7 @@ void AvoidRules()
 //                      GoTo_FRB (Fuzzy Rule based)                         //
 //==========================================================================//
 void GoTo_FRB(float xt, float yt)
-{ 
+{
     do
     {
         // Compute current position
@@ -262,9 +248,8 @@ void GoTo_FRB(float xt, float yt)
 
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
-        //SetPolarSpeed(100, 2);
 
-        Sleep(200);
+        Sleep(400);
     }
     while(!goalReached());
 
@@ -272,9 +257,6 @@ void GoTo_FRB(float xt, float yt)
 	update_position();
     printf("Goal has been reached.\n\n");
 	
-	//Compute distances to goal (dx, dy)
-	//compute_difference_to_target_point(xt, yt, &dx, &dy);
-
 	//Convert (dx,dy) to errors (Eth, Epos)
 	err_pos = calculate_epos(dx,dy);
 	err_th = calculate_Eth(dx,dy);
@@ -287,6 +269,9 @@ void GoTo_FRB(float xt, float yt)
     printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
 }
 
+//==========================================================================//
+//                      Demo function (Avoid Obsticles)                     //
+//==========================================================================//
 void run_AvoidRules()
 { 
     int i = 0;
@@ -317,6 +302,9 @@ void run_AvoidRules()
     }
 }
 
+//==========================================================================//
+//                      Track Function (Avoid Obsticles)                    //
+//==========================================================================//
 void FuzzyTrack(float* xarray, float* yarray, int n)
 {
 	for (int i=0; i< n; i++)
@@ -339,20 +327,14 @@ void lab4()
 	delta_position = 25.0;
 	//delta_th = (float)(PI / 24);
 
-	float xt = 240.0;
-	float yt = 240.0;
-
-	//int n = 4;
-	
-	//float xarray[10] = {240, 240, 0, 0};
-	//float yarray[10] = {0, 240, 240, 0};
-
-    //openFile(&fp);
-    //GoTo_FRB(xt, yt); 
-    //FuzzyTrack(xarray, yarray, n);
-    //closeFile(&fp);
+	float xt = -300.0;
+	float yt = 0.0;
 
     openFile(&fp);
-    run_AvoidRules();
+    GoTo_FRB(xt, yt); 
     closeFile(&fp);
+
+    //openFile(&fp);
+    //run_AvoidRules();
+    //closeFile(&fp);
 }
