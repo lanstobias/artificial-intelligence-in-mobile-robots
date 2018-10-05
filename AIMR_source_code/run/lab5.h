@@ -1,10 +1,18 @@
 #ifndef LAB5H
 #define LAB5H
 
+#include <stdbool.h>
+#include "Queue.h"
+
 /** @brief
  *
  */
-void Search();
+bool breadth_first_search(Cell goal_cell);
+
+/** @brief
+ *
+ */
+void MarkCell(int i, int j, int distance);
 
 /** @brief
  *
