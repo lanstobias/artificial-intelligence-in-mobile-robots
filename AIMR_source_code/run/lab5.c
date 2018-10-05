@@ -7,6 +7,7 @@
 #include "lab4.h"
 #include "lab5.h"
 #include "Queue.h"
+#include "map.h"
 
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
@@ -15,12 +16,31 @@
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
+#define clear() printf("\033[H\033[J")
 
 // Globals
 Queue main_queue;
 Cell robot_start_position;
 
-// example map
+int map2[16][16] = {  
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -3, -2, -2, -2, -3, -1},
+    {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -3, -3, -3, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -3, -3, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -1},
+    {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -3, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -3, -3, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -3, -2, -2, -3, -2, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
 int map[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
@@ -40,9 +60,6 @@ int map[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-//==========================================================================//
-//                       Helper funciton (print map)                        //
-//==========================================================================//
 void printMap() {
     for (int i=0; i<16; i++) {
         for (int j=0; j<16; j++) {
@@ -78,6 +95,24 @@ void printPrettyMap() {
     }
 }
 
+void printWaterMap() {
+    for (int i=0; i<16; i++) {
+        for (int j=0; j<16; j++) {
+            
+            switch(map[i][j]) {   
+                case 0: printf(ANSI_COLOR_GREEN " G" ANSI_COLOR_RESET) ;break;
+                case -1: printf(ANSI_COLOR_YELLOW "\u2586\u2586" ANSI_COLOR_RESET) ;break;
+                case -2: printf("\u2591\u2591") ;break;
+                case -3: printf(ANSI_COLOR_RED"\u2586\u2586" ANSI_COLOR_RESET) ;break;
+                case -4: printf(ANSI_COLOR_BLUE " S" ANSI_COLOR_RESET) ;break;
+                default: printf(ANSI_COLOR_CYAN "\u2591\u2591" ANSI_COLOR_RESET);
+            }         
+        }
+        
+        printf("\n");    
+    }
+}
+
 bool cell_is_robot_start_postiion(Q_Element cell)
 {
     return ((cell.i == robot_start_position.i) && 
@@ -88,6 +123,13 @@ void place_start_and_end_on_map(Cell start_cell, Cell goal_cell)
 {
     map[start_cell.i][start_cell.j] = -4;
     map[goal_cell.i][goal_cell.j] = 0;
+}
+
+void simulate_search()
+{
+    clear();
+    printWaterMap();
+    Sleep(50);
 }
 
 //==========================================================================//
@@ -122,6 +164,9 @@ bool breadth_first_search(Cell goal_cell)
         MarkCell(c.i, (c.j + 1), distance);
         MarkCell((c.i - 1), c.j, distance);
         MarkCell((c.i + 1), c.j, distance);
+
+        // Uncomment to see the search in action
+        // simulate_search();
     }
     
     // If the queue is empty then return fail

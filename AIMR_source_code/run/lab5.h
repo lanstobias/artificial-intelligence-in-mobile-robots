@@ -19,4 +19,8 @@ void MarkCell(int i, int j, int distance);
  */
 void lab5();
 
+void printMap();
+void printPrettyMap();
+void printWaterMap();
+
 #endif
