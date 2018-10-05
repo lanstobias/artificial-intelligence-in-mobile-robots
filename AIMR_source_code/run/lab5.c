@@ -7,12 +7,11 @@
 #include "lab5.h"
 #include "Queue.h"
 
-void Search()
+void breadth_first_search()
 {
-
 }
 
 void lab5()
 {
-
+    test_queue();
 }

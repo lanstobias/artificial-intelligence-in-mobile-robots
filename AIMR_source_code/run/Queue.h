@@ -1,27 +1,26 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+#include <stdbool.h>
+
 #define Q_MAX_NUM 30
 
+typedef struct Q_Element Q_Element;
+
+/** @brief Holds the index for a cell in the grid. */
 typedef struct
 {
     int i, j;
 } Cell;
 
-typedef struct Q_Element Q_Element;
-
-/** @brief
- * 
- */
+/** @brief An element in the queue. */
 struct Q_Element
 {
     int i, j;
     Q_Element* next;
 };
 
-/** @brief Queue struct.
- * 
- */
+/** @brief Linked list queue. */
 typedef struct
 {
     Q_Element* head;
@@ -30,20 +29,23 @@ typedef struct
     Q_Element element[Q_MAX_NUM];
 } Queue;
 
+void queue_init(Queue* q);
+
 /** @brief Clears the queue.
- * 
- * @param q The queue.
+ *
+ * @param q Pointer to the queue struct.
  * @return Void
  */
 void clear_queue(Queue* q);
 
-/** @brief
+/** @brief ??
  *
- * @param q The queue.
+ * @param q Pointer to the queue struct.
+ * @return Pointer to the element struct.
  */
 Q_Element* get_el_queue(Queue* q);
 
-/** @brief
+/** @brief ??
  *
  * @return Void
  */
@@ -51,26 +53,37 @@ void free_el_queue(Queue* q, Q_Element* el);
 
 /** @brief Check if the queue is empty.
  *
- * @param q The queue.
- * @return True or false as 0 or 1.
+ * @param q Pointer to the queue struct.
+ * @return True or false.
  */
-int empty_queue(Queue* q);
+bool empty_queue(Queue* q);
 
-/** @brief
+/** @brief Push a cell to the queue.
  *
+ * @param q Pointer to the queue struct.
+ * @param cell The cell struct containing the index values.
+ * @return Void
  */
 void push_queue(Queue* q, Cell cell);
 
-/** @brief
+/** @brief Pop an element from the queue.
  *
- * @param q The queue.
+ * @param q Pointer to the queue struct.
+ * @return The element struct.
  */
 Q_Element pop_queue(Queue* q);
 
-/** @brief
+/** @brief Print the content of the queue.
+ *
+ * @param q The queue struct.
+ * @return Void.
+ */
+void print_queue(Queue q);
+
+/** @brief Test and debugging function for the queue.
  *
  * @return Void
  */
-void testQueue();
+void test_queue();
 
 #endif
