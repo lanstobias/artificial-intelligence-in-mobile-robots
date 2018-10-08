@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	//lab4();
     lab5();
 
-	printf("\n\nDone...\n");
+	printf("\nDone...\n");
 
 	return (0);
  }

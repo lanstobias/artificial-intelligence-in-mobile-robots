@@ -18,6 +18,9 @@
 #define ANSI_COLOR_RESET   "\x1b[0m"
 #define clear() printf("\033[H\033[J")
 
+#define NUM_NEIGHBOR_CELLS 4
+#define LARGE_INT 1000000
+
 // Globals
 Queue main_queue;
 Cell robot_start_position;
@@ -77,18 +80,33 @@ void printMap() {
     }
 }
 
-void printPrettyMap() {
+void printPrettyMap(Queue path) {
+    Cell cell;
+
     for (int i=0; i<16; i++) {
-        for (int j=0; j<16; j++) {
-            
-            switch(map[i][j]) {   
-                case 0: printf(ANSI_COLOR_GREEN " G" ANSI_COLOR_RESET) ;break;
-                case -1: printf(ANSI_COLOR_YELLOW "\u2586\u2586" ANSI_COLOR_RESET) ;break;
-                case -2: printf("\u2591\u2591") ;break;
-                case -3: printf(ANSI_COLOR_RED"\u2586\u2586" ANSI_COLOR_RESET) ;break;
-                case -4: printf(ANSI_COLOR_BLUE " S" ANSI_COLOR_RESET) ;break;
-                default: printf("%2d", map[i][j]);
-            }         
+        for (int j=0; j<16; j++)
+        {
+            switch(map[i][j])
+            {
+                case 0: printf(ANSI_COLOR_GREEN " G" ANSI_COLOR_RESET); break;
+                case -1: printf(ANSI_COLOR_YELLOW "\u2586\u2586" ANSI_COLOR_RESET); break;
+                case -2: printf("\u2591\u2591"); break;
+                case -3: printf(ANSI_COLOR_RED"\u2586\u2586" ANSI_COLOR_RESET); break;
+                case -4: printf(ANSI_COLOR_BLUE " S" ANSI_COLOR_RESET); break;
+                default:
+                    cell.i = i;
+                    cell.j = j;
+
+                    if (cell_in_queue(path, cell))
+                    {
+                        printf(ANSI_COLOR_CYAN "%2d" ANSI_COLOR_RESET, map[i][j]);
+                    }
+                    else
+                    {
+                        printf("%2d", map[i][j]);
+                    }
+                    break;
+            }
         }
         
         printf("\n");    
@@ -166,7 +184,7 @@ bool breadth_first_search(Cell goal_cell)
         MarkCell((c.i + 1), c.j, distance);
 
         // Uncomment to see the search in action
-        // simulate_search();
+        simulate_search();
     }
     
     // If the queue is empty then return fail
@@ -202,6 +220,95 @@ void MarkCell(int i, int j, int distance)
     }
 }
 
+void generate_neighboring_cells(Cell current_cell, Cell* current_cell_neighbors)
+{
+    current_cell_neighbors[0].i = (current_cell.i - 1);
+    current_cell_neighbors[0].j = (current_cell.j);
+
+    current_cell_neighbors[1].i = (current_cell.i + 1);
+    current_cell_neighbors[1].j = (current_cell.j);
+
+    current_cell_neighbors[2].i = (current_cell.i);
+    current_cell_neighbors[2].j = (current_cell.j - 1);
+
+    current_cell_neighbors[3].i = (current_cell.i);
+    current_cell_neighbors[3].j = (current_cell.j + 1);
+}
+
+void print_cell(Cell cell)
+{
+    printf("[%d, %d]->", cell.i, cell.j);
+}
+
+void print_goal(Cell goal_cell)
+{
+    printf("[%d, %d]\n", goal_cell.i, goal_cell.j);
+}
+
+Queue Plan(Cell start_cell, Cell goal_cell)
+{
+    Queue path;
+    queue_init(&path);
+
+    if (!breadth_first_search(goal_cell))
+    {
+        printf("Did not find the goal.\n");
+        return path;
+    }
+
+    Cell current_cell, best_cell, neighbor_cell;
+    Cell current_cell_neighbors[NUM_NEIGHBOR_CELLS] ;
+    int best_value, neighbor_cell_value;
+
+    current_cell = start_cell;
+    push_queue(&path, current_cell);
+
+    while (map[current_cell.i][current_cell.j] != 0)
+    {
+        generate_neighboring_cells(current_cell, current_cell_neighbors);
+        best_value = LARGE_INT;
+    
+        for (int i = 0; i < NUM_NEIGHBOR_CELLS; i++)
+        {
+            neighbor_cell = current_cell_neighbors[i];
+            neighbor_cell_value = map[neighbor_cell.i][neighbor_cell.j];
+
+            if (neighbor_cell_value < best_value && neighbor_cell_value >= 0)
+            {
+                best_value = neighbor_cell_value;
+                best_cell = neighbor_cell;
+            }
+        }
+
+        current_cell = best_cell;
+        push_queue(&path, current_cell);
+    }
+
+    return path;
+}
+
+bool cell_in_queue(Queue path, Cell cell)
+{
+    if (path.head == NULL)
+    {
+        return false;
+    }
+    
+    Q_Element* queue_iterator;
+
+    for (queue_iterator = path.head;
+         queue_iterator->next != NULL;
+         queue_iterator = queue_iterator->next)
+    {
+        if (cell.i == queue_iterator->i && cell.j == queue_iterator->j)
+        {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 //==========================================================================//
 //                                  lab5                                    //
 //==========================================================================//
@@ -209,14 +316,22 @@ void lab5()
 {
     queue_init(&main_queue);
     Cell goal_cell;
+
+    // Easy map
+    robot_start_position.i = 4;
+    robot_start_position.j = 13;
     goal_cell.i = 11;
     goal_cell.j = 9;
 
-    robot_start_position.i = 4;
-    robot_start_position.j = 13;
+    // Hard map
+    //robot_start_position.i = 7;
+    //robot_start_position.j = 14;
+    //goal_cell.i = 14;
+    //goal_cell.j = 14;
 
     place_start_and_end_on_map(robot_start_position, goal_cell);
 
+    /*
     printf("Map before search:\n");
     printPrettyMap();
 
@@ -231,7 +346,14 @@ void lab5()
     }
 
     printf("Map after search:\n");
-    printPrettyMap();
+    */
+    Queue path;
+    queue_init(&path);
+    
+    printPrettyMap(path);
+    path = Plan(robot_start_position, goal_cell);
+    printPrettyMap(path);
 
+    print_queue(path);
     //test_queue();
 }
