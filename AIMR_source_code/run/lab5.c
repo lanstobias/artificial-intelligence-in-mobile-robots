@@ -9,6 +9,7 @@
 #include "Queue.h"
 #include "map.h"
 
+// Macros
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -62,6 +63,7 @@ int map[16][16] = {
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -3, -2, -2, -3, -2, -1},
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
+
 
 void printMap() {
     for (int i=0; i<16; i++) {
@@ -150,9 +152,6 @@ void simulate_search()
     Sleep(50);
 }
 
-//==========================================================================//
-//                            Search funciton                               //
-//==========================================================================//
 bool breadth_first_search(Cell goal_cell)
 {
     Q_Element c;
@@ -184,7 +183,7 @@ bool breadth_first_search(Cell goal_cell)
         MarkCell((c.i + 1), c.j, distance);
 
         // Uncomment to see the search in action
-        simulate_search();
+        //simulate_search();
     }
     
     // If the queue is empty then return fail
@@ -309,23 +308,26 @@ bool cell_in_queue(Queue path, Cell cell)
     return false;
 }
 
-//==========================================================================//
-//                                  lab5                                    //
-//==========================================================================//
 void lab5()
 {
     queue_init(&main_queue);
     Cell goal_cell;
 
     // Easy map
-    robot_start_position.i = 4;
-    robot_start_position.j = 13;
-    goal_cell.i = 11;
-    goal_cell.j = 9;
+    //robot_start_position.i = 4;
+    //robot_start_position.j = 13;
+    //goal_cell.i = 11;
+    //goal_cell.j = 9;
+
+    // Easy map with different start/goal
+    robot_start_position.i = 14;
+    robot_start_position.j = 14;
+    goal_cell.i = 1;
+    goal_cell.j = 1;
 
     // Hard map
     //robot_start_position.i = 7;
-    //robot_start_position.j = 14;
+    //robot_start_position.j = 5;
     //goal_cell.i = 14;
     //goal_cell.j = 14;
 
@@ -351,9 +353,10 @@ void lab5()
     queue_init(&path);
     
     printPrettyMap(path);
+    printf("\n");
     path = Plan(robot_start_position, goal_cell);
     printPrettyMap(path);
 
-    print_queue(path);
+    //print_queue(path);
     //test_queue();
 }
