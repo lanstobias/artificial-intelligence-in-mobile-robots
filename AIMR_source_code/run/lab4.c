@@ -48,26 +48,27 @@ void GoToRules(float xt, float yt)
     printf("ante: %lf\n", ante);
     printf("err_th: %lf err_pos: %lf\n", err_th, err_pos);
 
-    // First part: computation of the needed variables
+    // System output, computation of the needed variables
     compute_difference_to_target_point(xt, yt, &dx, &dy);
 
+    // Controller input
     err_pos = calculate_epos(dx,dy);	
     err_th = ( (calculate_Eth(dx, dy) * 180.0) / M_PI );
 
-    // Second part: truth computation of the predicates 
+    // Evaluate truth of predicates (fuzzification)
     Pos_Left = RampUp(err_th, 0, 60);
     Pos_Right = RampDown(err_th, -60, 0);
     Pos_Ahead = MIN( RampUp(err_th, -30, 0), RampDown(err_th, 0, 30) );
     Pos_Here = RampDown(err_pos, 10, 50);
 
-    // Third part: the rules
+    // Evaluate the fuzzy rules
     RULESET;
         IF (AND(Pos_Left, NOT(Pos_Here))); ROT(LEFT); 
         IF (AND(Pos_Right, NOT(Pos_Here))); ROT(RIGHT); 
         IF (OR(Pos_Here, Pos_Ahead)); ROT(AHEAD);
         
-        IF(AND(Pos_Ahead, NOT(Pos_Here))); VEL(FAST); 
-        IF(OR(Pos_Here, NOT(Pos_Ahead))); VEL(NONE);
+        IF (AND(Pos_Ahead, NOT(Pos_Here))); VEL(FAST); 
+        IF (OR(Pos_Here, NOT(Pos_Ahead))); VEL(NONE);
     RULEEND;
 };
 
@@ -235,15 +236,14 @@ void GoTo_FRB(float xt, float yt)
         GoToRules(xt, yt);
 
         // Defuzzify and set rot/vel
-
         DeFuzzify(vrot, 3, &rot);
         DeFuzzify(vlin, 4, &vel);
 
         final_speed = ResponseToVelGoto(vel); 
         final_rotation_speed = ResponseToRotGoto(rot); 
 
-        printf("vel: %lf, rot: %lf\n\n", vel, rot);
-        printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
+        //printf("vel: %lf, rot: %lf\n\n", vel, rot);
+        //printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
         printSets();
 
         // Send commands to robot
