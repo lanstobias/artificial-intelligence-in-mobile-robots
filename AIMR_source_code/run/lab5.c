@@ -10,6 +10,7 @@
 #include "map.h"
 
 // Macros
+// source: https://stackoverflow.com/a/3219471
 #define ANSI_COLOR_RED     "\x1b[31m"
 #define ANSI_COLOR_GREEN   "\x1b[32m"
 #define ANSI_COLOR_YELLOW  "\x1b[33m"
@@ -26,7 +27,7 @@
 Queue main_queue;
 Cell robot_start_position;
 
-int map2[16][16] = {  
+int map[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -3, -2, -2, -2, -3, -1},
@@ -45,7 +46,7 @@ int map2[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-int map[16][16] = {  
+int map1[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
@@ -149,7 +150,7 @@ void simulate_search()
 {
     clear();
     printWaterMap();
-    Sleep(50);
+    Sleep(30);
 }
 
 bool breadth_first_search(Cell goal_cell)
@@ -183,7 +184,7 @@ bool breadth_first_search(Cell goal_cell)
         MarkCell((c.i + 1), c.j, distance);
 
         // Uncomment to see the search in action
-        //simulate_search();
+        simulate_search();
     }
     
     // If the queue is empty then return fail
@@ -251,7 +252,7 @@ Queue Plan(Cell start_cell, Cell goal_cell)
 
     if (!breadth_first_search(goal_cell))
     {
-        printf("Did not find the goal.\n");
+        printf("Did not find the goal :(\n");
         return path;
     }
 
@@ -310,53 +311,44 @@ bool cell_in_queue(Queue path, Cell cell)
 
 void lab5()
 {
-    queue_init(&main_queue);
+    Queue path;
     Cell goal_cell;
 
-    // Easy map
-    //robot_start_position.i = 4;
-    //robot_start_position.j = 13;
-    //goal_cell.i = 11;
-    //goal_cell.j = 9;
+    queue_init(&main_queue);
+    queue_init(&path);
+
+    // Easy Map
+    /*
+    robot_start_position.i = 4;
+    robot_start_position.j = 13;
+    goal_cell.i = 11;
+    goal_cell.j = 9;
+    */
 
     // Easy map with different start/goal
+    /* 
     robot_start_position.i = 14;
     robot_start_position.j = 14;
     goal_cell.i = 1;
     goal_cell.j = 1;
+    */
 
     // Hard map
-    //robot_start_position.i = 7;
-    //robot_start_position.j = 5;
-    //goal_cell.i = 14;
-    //goal_cell.j = 14;
+    /*
+    robot_start_position.i = 7;
+    robot_start_position.j = 5;
+    goal_cell.i = 14;
+    goal_cell.j = 14;
+    */
 
     place_start_and_end_on_map(robot_start_position, goal_cell);
 
-    /*
-    printf("Map before search:\n");
-    printPrettyMap();
-
-    printf("Searching..\n");
-    if (breadth_first_search(goal_cell))
-    {
-        printf("Search successfull!\n");
-    }
-    else
-    {
-        printf("Search failed :(\n");
-    }
-
-    printf("Map after search:\n");
-    */
-    Queue path;
-    queue_init(&path);
-    
+    // Planning
     printPrettyMap(path);
     printf("\n");
     path = Plan(robot_start_position, goal_cell);
     printPrettyMap(path);
 
-    //print_queue(path);
-    //test_queue();
+    print_queue(path);
+
 }
