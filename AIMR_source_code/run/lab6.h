@@ -4,6 +4,7 @@
 #include "lab5.h"
 
 void printMenuOptions();
+void wait_for_user();
 void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map);
 bool menu(int menu_choice, Cell* start_cell, Cell* goal_cell, Map_custom* current_map);
 void change_start_cell(Cell* start_cell);

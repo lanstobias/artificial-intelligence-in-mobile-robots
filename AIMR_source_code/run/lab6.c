@@ -17,7 +17,8 @@
 
 #define NUM_OF_MAPS 3
 
-int hard_map_info[16][16] = {  
+// Globals
+static int hard_map_info[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -3, -2, -2, -2, -3, -1},
@@ -36,7 +37,7 @@ int hard_map_info[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-int easy_map_info[16][16] = {  
+static int easy_map_info[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
@@ -55,9 +56,15 @@ int easy_map_info[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-// Globals
 Map_custom easy_map, medium_map, hard_map;
 Map_custom maps[NUM_OF_MAPS];
+
+void wait_for_user()
+{
+    printf("Press any key to continue..");
+    getchar();
+    getchar();
+}
 
 void printMenuOptions() {
     printf("Robot menu:\n");
@@ -72,9 +79,17 @@ void printMenuOptions() {
 
 void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
 {
-    printf("Searches and plans!\n");
-    getchar();
-    getchar();
+    Queue path, queue;
+    queue_init(&path);
+    queue_init(&queue);
+
+    place_start_and_end_on_map(current_map, *start_cell, *goal_cell);
+    path = Plan(current_map, &queue, *start_cell, *goal_cell);
+
+    printPrettyMap(*current_map, path);
+    print_queue(path);
+
+    wait_for_user();
 }
 
 bool menu(int menu_choice, Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
@@ -216,8 +231,8 @@ void initialize_cells(Cell* start_cell, Cell* goal_cell)
     start_cell->i = 1;
     start_cell->j = 1;
     
-    goal_cell->i = 14;
-    goal_cell->j = 14;
+    goal_cell->i = 5;
+    goal_cell->j = 5;
 }
 
 void lab6()
@@ -226,6 +241,7 @@ void lab6()
     
     int menu_choice;
     Cell start_cell, goal_cell;
+    //queue_init(&main_queue);
     initialize_maps();
     initialize_cells(&start_cell, &goal_cell);
 
@@ -248,6 +264,7 @@ void lab6()
         printMenuOptions();
         printf("\nEnter choice: ");
         scanf("%d", &menu_choice);
+
     }
     while (menu(menu_choice, &start_cell, &goal_cell, &current_map)); 
 }

@@ -23,7 +23,7 @@ typedef struct
  * @param goal_cell The starting cell of the search.
  * @return True if the search is successfull, false otherwise.
  */
-bool breadth_first_search(Cell goal_cell);
+bool breadth_first_search(Map_custom* map, Queue* queue, Cell start_cell, Cell goal_cell);
 
 /** @brief Mark a cell with with distance from goal cell.
  * 
@@ -32,37 +32,37 @@ bool breadth_first_search(Cell goal_cell);
  * @param distance The distance from the goal cell.
  * @return Void.
  */
-void MarkCell(int i, int j, int distance);
+void MarkCell(Map_custom* map, Queue* queue, int i, int j, int distance);
 
 /** @brief Print map with only numbers.
  * 
  * @return Void.
  */
-void printMap();
+void printMap(Map_custom map);
 
 /** @brief Print a map using Unicode characters.
  * 
  * @return Void.
  */
-void printPrettyMap(Queue path);
+void printPrettyMap(Map_custom map, Queue path);
 
 /** @brief Print explored cells with blue unicode character.
  * 
  * @return Void.
  */
-void printWaterMap();
+void printWaterMap(Map_custom map);
 
 /** @brief Check if the cell is the robot start position.
  * 
  * @return True or false.
  */
-bool cell_is_robot_start_postiion(Q_Element cell);
+bool cell_is_robot_start_position(Q_Element cell, Cell start_cell);
 
 /** @brief Place start cell and goal cell on the map.
  * 
  * @return Void.
  */
-void place_start_and_end_on_map(Cell start_cell, Cell goal_cell);
+void place_start_and_end_on_map(Map_custom* map, Cell start_cell, Cell goal_cell);
 
 /** @brief Visualize the search algorithm.
  * 
@@ -72,7 +72,7 @@ void place_start_and_end_on_map(Cell start_cell, Cell goal_cell);
  * 
  * @return Void.
  */
-void simulate_search();
+void simulate_search(Map_custom map);
 
 /** @brief Create and store neighboring cells of the current cell.
  * 
@@ -102,7 +102,7 @@ void print_goal(Cell goal_cell);
  * @param goal_cell The robot's goal position.
  * @return A queue with each cell making up the path to the goal cell.
  */
-Queue Plan(Cell start_cell, Cell goal_cell);
+Queue Plan(Map_custom* map, Queue* queue, Cell start_cell, Cell goal_cell);
 
 /** @brief Check if the queue is containing a specific cell.
  * 

@@ -23,10 +23,10 @@
 #define LARGE_INT 1000000
 
 // Globals
-Queue main_queue;
-Cell robot_start_position;
+Map_custom easy_map_lab5;
+Map_custom hard_map_lab5;
 
-int map[16][16] = {  
+static int hard_map_info[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -3, -2, -2, -2, -3, -1},
@@ -45,7 +45,7 @@ int map[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-int map1[16][16] = {  
+static int easy_map_info[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
@@ -64,17 +64,16 @@ int map1[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-
-void printMap() {
+void printMap(Map_custom map) {
     for (int i=0; i<16; i++) {
         for (int j=0; j<16; j++) {
             
-            switch(map[i][j]) {   
+            switch(map.map[i][j]) {   
                 case -1: printf("-1") ;break;
                 case -2: printf("-2") ;break;
                 case -3: printf("-3") ;break;
                 case -4: printf("-4") ;break;
-                default: printf(" %d", map[i][j]);
+                default: printf(" %d", map.map[i][j]);
             }         
         }
         
@@ -82,13 +81,13 @@ void printMap() {
     }
 }
 
-void printPrettyMap(Queue path) {
+void printPrettyMap(Map_custom map, Queue path) {
     Cell cell;
 
     for (int i=0; i<16; i++) {
         for (int j=0; j<16; j++)
         {
-            switch(map[i][j])
+            switch(map.map[i][j])
             {
                 case 0: printf(ANSI_COLOR_GREEN " G" ANSI_COLOR_RESET); break;
                 case -1: printf(ANSI_COLOR_YELLOW "\u2586\u2586" ANSI_COLOR_RESET); break;
@@ -101,11 +100,11 @@ void printPrettyMap(Queue path) {
 
                     if (cell_in_queue(path, cell))
                     {
-                        printf(ANSI_COLOR_CYAN "%2d" ANSI_COLOR_RESET, map[i][j]);
+                        printf(ANSI_COLOR_CYAN "%2d" ANSI_COLOR_RESET, map.map[i][j]);
                     }
                     else
                     {
-                        printf("%2d", map[i][j]);
+                        printf("%2d", map.map[i][j]);
                     }
                     break;
             }
@@ -115,11 +114,11 @@ void printPrettyMap(Queue path) {
     }
 }
 
-void printWaterMap() {
+void printWaterMap(Map_custom map) {
     for (int i=0; i<16; i++) {
         for (int j=0; j<16; j++) {
             
-            switch(map[i][j]) {   
+            switch(map.map[i][j]) {   
                 case 0: printf(ANSI_COLOR_GREEN " G" ANSI_COLOR_RESET) ;break;
                 case -1: printf(ANSI_COLOR_YELLOW "\u2586\u2586" ANSI_COLOR_RESET) ;break;
                 case -2: printf("\u2591\u2591") ;break;
@@ -133,84 +132,84 @@ void printWaterMap() {
     }
 }
 
-bool cell_is_robot_start_postiion(Q_Element cell)
+bool cell_is_robot_start_position(Q_Element cell, Cell start_cell)
 {
-    return ((cell.i == robot_start_position.i) && 
-            (cell.j == robot_start_position.j));
+    return ((cell.i == start_cell.i) && 
+            (cell.j == start_cell.j));
 }
 
-void place_start_and_end_on_map(Cell start_cell, Cell goal_cell)
+void place_start_and_end_on_map(Map_custom* map, Cell start_cell, Cell goal_cell)
 {
-    map[start_cell.i][start_cell.j] = -4;
-    map[goal_cell.i][goal_cell.j] = 0;
+    map->map[start_cell.i][start_cell.j] = -4;
+    map->map[goal_cell.i][goal_cell.j] = 0;
 }
 
-void simulate_search()
+void simulate_search(Map_custom map)
 {
     clear();
-    printWaterMap();
+    printWaterMap(map);
     Sleep(30);
 }
 
-bool breadth_first_search(Cell goal_cell)
+bool breadth_first_search(Map_custom* map, Queue* queue, Cell start_cell, Cell goal_cell)
 {
     Q_Element c;
     int distance;
 
-    clear_queue(&main_queue);
+    clear_queue(queue);
 
     // Put the goal cell in the queue
-    push_queue(&main_queue, goal_cell);
+    push_queue(queue, goal_cell);
 
     // Repeat until the queue is empty
-    while (!empty_queue(&main_queue))
+    while (!empty_queue(queue))
     {
         // Take a cell c from the queue
-        c = pop_queue(&main_queue);
+        c = pop_queue(queue);
         
         // If c is the robot cell, then return success
-        if (cell_is_robot_start_postiion(c))
+        if (cell_is_robot_start_position(c, start_cell))
         {
             return true;
         }
 
         // foreach n which is a neighbor cell of c
-        distance = (map[c.i][c.j] + 1);
+        distance = (map->map[c.i][c.j] + 1);
 
-        MarkCell(c.i, (c.j - 1), distance);
-        MarkCell(c.i, (c.j + 1), distance);
-        MarkCell((c.i - 1), c.j, distance);
-        MarkCell((c.i + 1), c.j, distance);
+        MarkCell(map, queue, c.i, (c.j - 1), distance);
+        MarkCell(map, queue, c.i, (c.j + 1), distance);
+        MarkCell(map, queue, (c.i - 1), c.j, distance);
+        MarkCell(map, queue, (c.i + 1), c.j, distance);
 
         // Uncomment to see the search in action
-        simulate_search();
+        simulate_search(*map);
     }
     
     // If the queue is empty then return fail
     return false;
 }
 
-void MarkCell(int i, int j, int distance)
+void MarkCell(Map_custom* map, Queue* queue, int i, int j, int distance)
 {
     Cell cell_to_be_marked; 
     cell_to_be_marked.i = i;
     cell_to_be_marked.j = j;
 
-    switch (map[i][j])
+    switch (map->map[i][j])
     {
         case -1:
             break;
 
         case -2:
-            map[i][j] = distance;
-            push_queue(&main_queue, cell_to_be_marked);
+            map->map[i][j] = distance;
+            push_queue(queue, cell_to_be_marked);
             break;
 
         case -3:
             break;
 
         case -4:
-            push_queue(&main_queue, cell_to_be_marked);
+            push_queue(queue, cell_to_be_marked);
             break;
     
         default:
@@ -244,12 +243,12 @@ void print_goal(Cell goal_cell)
     printf("[%d, %d]\n", goal_cell.i, goal_cell.j);
 }
 
-Queue Plan(Cell start_cell, Cell goal_cell)
+Queue Plan(Map_custom* map, Queue* queue, Cell start_cell, Cell goal_cell)
 {
     Queue path;
     queue_init(&path);
 
-    if (!breadth_first_search(goal_cell))
+    if (!breadth_first_search(map, queue, start_cell, goal_cell))
     {
         printf("Did not find the goal :(\n");
         return path;
@@ -262,7 +261,7 @@ Queue Plan(Cell start_cell, Cell goal_cell)
     current_cell = start_cell;
     push_queue(&path, current_cell);
 
-    while (map[current_cell.i][current_cell.j] != 0)
+    while (map->map[current_cell.i][current_cell.j] != 0)
     {
         generate_neighboring_cells(current_cell, current_cell_neighbors);
         best_value = LARGE_INT;
@@ -270,7 +269,7 @@ Queue Plan(Cell start_cell, Cell goal_cell)
         for (int i = 0; i < NUM_NEIGHBOR_CELLS; i++)
         {
             neighbor_cell = current_cell_neighbors[i];
-            neighbor_cell_value = map[neighbor_cell.i][neighbor_cell.j];
+            neighbor_cell_value = map->map[neighbor_cell.i][neighbor_cell.j];
 
             if (neighbor_cell_value < best_value && neighbor_cell_value >= 0)
             {
@@ -308,21 +307,35 @@ bool cell_in_queue(Queue path, Cell cell)
     return false;
 }
 
+void initialize_maps_lab5()
+{
+    easy_map_lab5.map = easy_map_info;
+    strcpy(easy_map_lab5.name, "Easy map");
+
+    hard_map_lab5.map = hard_map_info;
+    strcpy(hard_map_lab5.name, "Hard map");
+}
+
 void lab5()
 {
-    Queue path;
-    Cell goal_cell;
+    printf("Start of lab5\n");
+    Queue path, queue;
+    Cell goal_cell, robot_start_position;
+    Map_custom current_map;
+    initialize_maps_lab5();
 
-    queue_init(&main_queue);
+    current_map=easy_map_lab5;
+
     queue_init(&path);
+    queue_init(&queue);
 
     // Easy Map
-    /*
+    
     robot_start_position.i = 4;
     robot_start_position.j = 13;
     goal_cell.i = 11;
     goal_cell.j = 9;
-    */
+    
 
     // Easy map with different start/goal
     /* 
@@ -340,14 +353,13 @@ void lab5()
     goal_cell.j = 14;
     */
 
-    place_start_and_end_on_map(robot_start_position, goal_cell);
+    place_start_and_end_on_map(&current_map, robot_start_position, goal_cell);
 
     // Planning
-    printPrettyMap(path);
+    printPrettyMap(current_map, path);
     printf("\n");
-    path = Plan(robot_start_position, goal_cell);
-    printPrettyMap(path);
+    path = Plan(&current_map, &queue, robot_start_position, goal_cell);
+    printPrettyMap(current_map, path);
 
     print_queue(path);
-
 }
