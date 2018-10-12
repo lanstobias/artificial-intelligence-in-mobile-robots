@@ -124,14 +124,6 @@ void printSets()
 }
 
 //==========================================================================//
-//                      Debug function (goal checker)                      //
-//==========================================================================//
-int goalReached()
-{ 
-    return (fabsf(err_pos) <= delta_position);
-}
-
-//==========================================================================//
 //                      Debug function (print IR-values)                    //
 //==========================================================================//
 void print_ir_values(Sensors ir)
@@ -310,8 +302,8 @@ void lab4()
     vel = 0;
 	printf("Test lab4\n\n");
 
-	float xt = -300.0;
-	float yt = 0.0;
+	//float xt = -300.0;
+	//float yt = 0.0;
 
     //openFile(&fp);
     //GoTo_FRB(xt, yt); 

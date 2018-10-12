@@ -4,6 +4,17 @@
 #include <stdbool.h>
 #include "Queue.h"
 
+#define MAP_MAX_NAME_SIZE 30
+#define clear() printf("\033[H\033[J")
+
+typedef int map_pointer[16];
+
+typedef struct
+{
+    map_pointer* map;
+    char name[MAP_MAX_NAME_SIZE];
+} Map_custom;
+
 /** @brief Search using bread first search.
  * 
  * Searches from the goal cell to the starting cell. The goal_cell

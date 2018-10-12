@@ -18,7 +18,6 @@
 #define ANSI_COLOR_MAGENTA "\x1b[35m"
 #define ANSI_COLOR_CYAN    "\x1b[36m"
 #define ANSI_COLOR_RESET   "\x1b[0m"
-#define clear() printf("\033[H\033[J")
 
 #define NUM_NEIGHBOR_CELLS 4
 #define LARGE_INT 1000000

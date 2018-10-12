@@ -12,7 +12,7 @@ none:
 CC			:= g++
 
 # Preparing files and flags
-SRCS		:= main.c lab1.c lab2.c lab3.c lab4.c
+SRCS		:= main.c lab1.c lab2.c lab3.c lab4.c lab5.c lab6.c Queue.c
 OBJS		:= $(SRCS:.c=.o)
 MODS		:=
 
