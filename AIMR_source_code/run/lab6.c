@@ -17,6 +17,8 @@
 
 #define NUM_OF_MAPS 3
 
+#define CELL_MM 20
+
 // Globals
 static int hard_map_info[16][16] = {  
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
@@ -86,8 +88,13 @@ void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
     place_start_and_end_on_map(current_map, *start_cell, *goal_cell);
     path = Plan(current_map, &queue, *start_cell, *goal_cell);
 
-    printPrettyMap(*current_map, path);
-    print_queue(path);
+    /* todo:
+    double coordinates_for_robot[whatever_size] = convert_path_to_robot_track(path);
+    Track(coordinates_for_robot);
+    */
+
+    //printPrettyMap(*current_map, path);
+    //print_queue(path);
 
     wait_for_user();
 }
@@ -233,6 +240,27 @@ void initialize_cells(Cell* start_cell, Cell* goal_cell)
     
     goal_cell->i = 5;
     goal_cell->j = 5;
+}
+
+double* path_to_robot_coordiantes(Queue path)
+{
+    double previous_i, previous_j;
+    int direction;
+    unsigned int steps = 1;
+    // Iterate through the path
+        // Read cell values i,j
+
+        // if (previous_i != i && previous_j == j)
+            // horizontal change
+
+        // if (previous_i == i && previous_j != j)
+            // vertical change
+
+            // store previous cell as robot coordinate as (steps * CELL_MM)
+            //Set steps to 1.
+
+        // else
+            //Add to steps
 }
 
 void lab6()
