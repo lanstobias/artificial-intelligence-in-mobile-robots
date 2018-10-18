@@ -138,8 +138,20 @@ Track_arrays convert_path_to_robot_track(Queue path)
     }
 
     Q_Element* current_cell;
-    Q_Element* previous_cell = path.head;
+    Q_Element* previous_cell = pop_queue(&path);
 
+
+    while (!empty_queue(&path))
+    {
+        current_cell = pop_queue(&path);
+
+        //everytthing
+        printf("[%d, %d]->", current_cell->i, current_cell->j);
+
+
+        previous_cell=current_cell;
+    }
+    /*
     for (current_cell = previous_cell->next;
          current_cell->next != NULL;
          current_cell = current_cell->next)
@@ -147,6 +159,7 @@ Track_arrays convert_path_to_robot_track(Queue path)
         
         printf("[%d, %d]->", current_cell->i, current_cell->j);
     }
+    */
     printf("\n");
     
     return track;
