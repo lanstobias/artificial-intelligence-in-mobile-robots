@@ -79,6 +79,79 @@ void printMenuOptions() {
     printf("[9] Exit the program.\n"); 
 }
 
+void direction_change(Q_Element current_cell, Q_Element previous_cell, Direction* direction, Movement* movement)
+{
+    // Move up
+    if (current_cell.i < previous_cell.i && current_cell.j == previous_cell.j)
+    {
+        *direction = UP;
+        movement->vertical += CELL_MM;
+        movement->horizontal += 0;
+    }
+    
+    // Move right
+    if (current_cell.i == previous_cell.i && current_cell.j > previous_cell.j)
+    {
+        *direction = RIGHT;
+        movement->vertical += 0;
+        movement->horizontal += CELL_MM;
+    }
+    
+    // Move down
+    if (current_cell.i > previous_cell.i && current_cell.j == previous_cell.j)
+    {
+        *direction = DOWN;
+        movement->vertical -= CELL_MM;
+        movement->horizontal += 0;
+    }
+    
+    // Move left
+    if (current_cell.i == previous_cell.i && current_cell.j < previous_cell.j)
+    {
+        *direction = LEFT;
+        movement->vertical += 0;
+        movement->horizontal -= CELL_MM;
+    }
+}
+
+void compare_directions(Track_arrays* track, Movement movement, Direction previous_direction, Direction current_direction, int* number_of_targets_added)
+{
+    if (previous_direction != current_direction)
+    {
+        track->xarray[*number_of_targets_added] = movement.horizontal;
+        track->yarray[*number_of_targets_added] = movement.vertical;
+        *number_of_targets_added++;
+    }
+}
+
+Track_arrays convert_path_to_robot_track(Queue path)
+{
+    Track_arrays track;
+    Movement movement;
+    Direction current_direction, previous_direction;
+    int number_of_targets_added=0;
+
+    if (path.head == NULL)
+    {
+        printf("Trying to use an empty path.\n");
+        exit(1);
+    }
+
+    Q_Element* current_cell;
+    Q_Element* previous_cell = path.head;
+
+    for (current_cell = previous_cell->next;
+         current_cell->next != NULL;
+         current_cell = current_cell->next)
+    {
+        
+        printf("[%d, %d]->", current_cell->i, current_cell->j);
+    }
+    printf("\n");
+    
+    return track;
+}
+
 void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
 {
     Queue path, queue;
@@ -88,13 +161,11 @@ void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
     place_start_and_end_on_map(current_map, *start_cell, *goal_cell);
     path = Plan(current_map, &queue, *start_cell, *goal_cell);
 
-    /* todo:
-    double coordinates_for_robot[whatever_size] = convert_path_to_robot_track(path);
-    Track(coordinates_for_robot);
-    */
+    Track_arrays coordinates_for_robot = convert_path_to_robot_track(path);
+    //Track(coordinates_for_robot);
 
-    //printPrettyMap(*current_map, path);
-    //print_queue(path);
+    printPrettyMap(*current_map, path);
+    print_queue(path);
 
     wait_for_user();
 }
@@ -241,7 +312,7 @@ void initialize_cells(Cell* start_cell, Cell* goal_cell)
     goal_cell->i = 5;
     goal_cell->j = 5;
 }
-
+/*
 double* path_to_robot_coordiantes(Queue path)
 {
     double previous_i, previous_j;
@@ -262,6 +333,7 @@ double* path_to_robot_coordiantes(Queue path)
         // else
             //Add to steps
 }
+*/
 
 void lab6()
 {
