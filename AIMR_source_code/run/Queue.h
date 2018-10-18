@@ -2,16 +2,11 @@
 #define QUEUE_H
 
 #include <stdbool.h>
+#include <epuck.hpp>
 
 #define Q_MAX_NUM 30
 
 typedef struct Q_Element Q_Element;
-
-/** @brief Holds the index for a cell in the grid. */
-typedef struct
-{
-    int i, j;
-} Cell;
 
 /** @brief An element in the queue. */
 struct Q_Element

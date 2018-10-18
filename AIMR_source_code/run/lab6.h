@@ -16,7 +16,7 @@ typedef struct
     int horizontal, vertical;
 } Movement;
 
-typedef enum {START, UP, RIGHT, DOWN, LEFT} Direction;
+typedef enum {Start, Up, Right, Down, Left} Direction;
 
 void printMenuOptions();
 Track_arrays convert_path_to_robot_track(Queue path);

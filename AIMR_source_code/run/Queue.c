@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "epuck.hpp"
 #include "Queue.h"
 
 void queue_init(Queue* q)

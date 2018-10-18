@@ -20,8 +20,8 @@ FILE* fp;
 
 // Macros
 // Goto
-#define VMAX_GOTO 200
-#define VMIN_GOTO -100
+#define VMAX_GOTO 160
+#define VMIN_GOTO -80
 #define RMAX_GOTO 2
 #define RMIN_GOTO -2
 
@@ -45,8 +45,8 @@ FILE* fp;
 //==========================================================================//
 void GoToRules(float xt, float yt)
 { 
-    printf("ante: %lf\n", ante);
-    printf("err_th: %lf err_pos: %lf\n", err_th, err_pos);
+    //printf("ante: %lf\n", ante);
+    //printf("err_th: %lf err_pos: %lf\n", err_th, err_pos);
 
     // System output, computation of the needed variables
     compute_difference_to_target_point(xt, yt, &dx, &dy);
@@ -228,22 +228,22 @@ void GoTo_FRB(float xt, float yt)
 
         Sleep(300);
     }
-    while (Pos_Here != 1.0);
+    while (!(Pos_Here >= 0.9));
 
     Stop();
 	update_position();
-    printf("Goal has been reached.\n\n");
+    //printf("Goal has been reached.\n\n");
 	
 	//Convert (dx,dy) to errors (Eth, Epos)
 	err_pos = calculate_epos(dx,dy);
 	err_th = calculate_Eth(dx,dy);
 
-	printf("---- Final values after goal has been reached: ---->\n");
-    printf("vel: %lf, rot: %lf\n\n", vel, rot);
-    printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
+	//printf("---- Final values after goal has been reached: ---->\n");
+    //printf("vel: %lf, rot: %lf\n\n", vel, rot);
+    //printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
 
     Posture posture = GetPosture();
-    printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
+    //printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
 }
 
 //==========================================================================//

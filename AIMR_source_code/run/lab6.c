@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <string.h>
 #include "Queue.h"
+#include "epuck.hpp"
+#include "lab4.h"
 #include "lab5.h"
 #include "lab6.h"
 
@@ -15,9 +17,9 @@
 #define CHANGE_MAP 5
 #define EXIT 9
 
-#define NUM_OF_MAPS 3
+#define NUM_OF_MAPS 4
 
-#define CELL_MM 20
+#define CELL_MM 41
 
 // Globals
 static int hard_map_info[16][16] = {  
@@ -58,7 +60,26 @@ static int easy_map_info[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-Map_custom easy_map, medium_map, hard_map;
+static int real_map_info[16][16] = {
+    {-1, -1, -1, -1, -1, -1, -1, -3, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -3, -3, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
+Map_custom easy_map, medium_map, hard_map, real_map;
 Map_custom maps[NUM_OF_MAPS];
 
 void wait_for_user()
@@ -82,30 +103,30 @@ void printMenuOptions() {
 bool direction_change(Q_Element current_cell, Q_Element previous_cell, Direction* direction, Movement* movement)
 {
     // Move up
-    if (current_cell.i < previous_cell.i && current_cell.j == previous_cell.j && direction != UP)
+    if (current_cell.i < previous_cell.i && current_cell.j == previous_cell.j && *direction != Up)
     {
-        *direction = UP;
+        *direction = Up;
         return true;
     }
     
     // Move right
-    if (current_cell.i == previous_cell.i && current_cell.j > previous_cell.j && direction != RIGHT)
+    if (current_cell.i == previous_cell.i && current_cell.j > previous_cell.j && *direction != Right)
     {
-        *direction = RIGHT;
+        *direction = Right;
         return true;
     }
     
     // Move down
-    if (current_cell.i > previous_cell.i && current_cell.j == previous_cell.j && direction != DOWN)
+    if (current_cell.i > previous_cell.i && current_cell.j == previous_cell.j && *direction != Down)
     {
-        *direction = DOWN;
+        *direction = Down;
         return true;
     }
     
     // Move left
-    if (current_cell.i == previous_cell.i && current_cell.j < previous_cell.j && direction != LEFT)
+    if (current_cell.i == previous_cell.i && current_cell.j < previous_cell.j && *direction != Left)
     {
-        *direction = LEFT;
+        *direction = Left;
         return true;
     }
 
@@ -116,25 +137,25 @@ void increse_movement(Direction direction, Movement* movement)
 {
     switch (direction)
     {
-        case START:
+        case Start:
             break;
 
-        case UP:
+        case Up:
             movement->vertical += CELL_MM;
             movement->horizontal += 0;
             break;
         
-        case RIGHT:
+        case Right:
             movement->vertical += 0;
             movement->horizontal += CELL_MM;
             break;
         
-        case DOWN:
+        case Down:
             movement->vertical -= CELL_MM;
             movement->horizontal += 0;
             break;
         
-        case LEFT:
+        case Left:
             movement->vertical += 0;
             movement->horizontal -= CELL_MM;
             break;
@@ -177,7 +198,7 @@ Track_arrays convert_path_to_robot_track(Queue path)
     movement.vertical = 0;
 
     //Direction keeps track of which way was moved now and what was moved previously
-    Direction direction = START;
+    Direction direction = Start;
 
     //The current cell in the path we are observing
     Q_Element current_cell;
@@ -218,10 +239,8 @@ void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
     path = Plan(current_map, &queue, *start_cell, *goal_cell);
 
     Track_arrays track = convert_path_to_robot_track(path);
-    FuzyTrack(track.xarray, track.yarray, track.size);
-
     printPrettyMap(*current_map, path);
-    print_queue(path);
+    FuzzyTrack(track.xarray, track.yarray, track.size);
 
     wait_for_user();
 }
@@ -358,15 +377,18 @@ void initialize_maps()
 
     hard_map.map = hard_map_info;
     strcpy(hard_map.name, "Hard map");
+
+    real_map.map = real_map_info;
+    strcpy(real_map.name, "Real map");
 }
 
 void initialize_cells(Cell* start_cell, Cell* goal_cell)
 {
-    start_cell->i = 1;
-    start_cell->j = 1;
+    start_cell->i = 2;
+    start_cell->j = 2;
     
-    goal_cell->i = 5;
-    goal_cell->j = 5;
+    goal_cell->i = 2;
+    goal_cell->j = 10;
 }
 
 void lab6()
@@ -383,7 +405,8 @@ void lab6()
     maps[0] = easy_map;
     maps[1] = medium_map;
     maps[2] = hard_map;
-    current_map = easy_map;
+    maps[3] = real_map;
+    current_map = real_map;
 
     do {
         clear();

@@ -7,7 +7,7 @@
 //#include "lab5.h"
 #include "lab6.h"
 
-#define ROBOT_NUMBER 6
+#define ROBOT_NUMBER "0"
 
 //==============================================================================//
 //                                  main                                        //
@@ -15,9 +15,9 @@
 int main(int argc, char *argv[])
 {
 	// epuck connection
-	//epuck(ROBOT_NUMBER);
-	//ClearSteps();
-	//SetPosture(0,0,0);
+	epuck(ROBOT_NUMBER);
+	ClearSteps();
+	SetPosture(0,0,0);
 	// Run program
 	printf("Starting...\n");
 

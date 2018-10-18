@@ -182,7 +182,7 @@ bool breadth_first_search(Map_custom* map, Queue* queue, Cell start_cell, Cell g
         MarkCell(map, queue, (c.i + 1), c.j, distance);
 
         // Uncomment to see the search in action
-        simulate_search(*map);
+        //simulate_search(*map);
     }
     
     // If the queue is empty then return fail
