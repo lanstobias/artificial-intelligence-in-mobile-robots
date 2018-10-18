@@ -79,89 +79,132 @@ void printMenuOptions() {
     printf("[9] Exit the program.\n"); 
 }
 
-void direction_change(Q_Element current_cell, Q_Element previous_cell, Direction* direction, Movement* movement)
+bool direction_change(Q_Element current_cell, Q_Element previous_cell, Direction* direction, Movement* movement)
 {
     // Move up
-    if (current_cell.i < previous_cell.i && current_cell.j == previous_cell.j)
+    if (current_cell.i < previous_cell.i && current_cell.j == previous_cell.j && direction != UP)
     {
         *direction = UP;
-        movement->vertical += CELL_MM;
-        movement->horizontal += 0;
+        return true;
     }
     
     // Move right
-    if (current_cell.i == previous_cell.i && current_cell.j > previous_cell.j)
+    if (current_cell.i == previous_cell.i && current_cell.j > previous_cell.j && direction != RIGHT)
     {
         *direction = RIGHT;
-        movement->vertical += 0;
-        movement->horizontal += CELL_MM;
+        return true;
     }
     
     // Move down
-    if (current_cell.i > previous_cell.i && current_cell.j == previous_cell.j)
+    if (current_cell.i > previous_cell.i && current_cell.j == previous_cell.j && direction != DOWN)
     {
         *direction = DOWN;
-        movement->vertical -= CELL_MM;
-        movement->horizontal += 0;
+        return true;
     }
     
     // Move left
-    if (current_cell.i == previous_cell.i && current_cell.j < previous_cell.j)
+    if (current_cell.i == previous_cell.i && current_cell.j < previous_cell.j && direction != LEFT)
     {
         *direction = LEFT;
-        movement->vertical += 0;
-        movement->horizontal -= CELL_MM;
+        return true;
+    }
+
+    return false;
+}
+
+void increse_movement(Direction direction, Movement* movement)
+{
+    switch (direction)
+    {
+        case START:
+            break;
+
+        case UP:
+            movement->vertical += CELL_MM;
+            movement->horizontal += 0;
+            break;
+        
+        case RIGHT:
+            movement->vertical += 0;
+            movement->horizontal += CELL_MM;
+            break;
+        
+        case DOWN:
+            movement->vertical -= CELL_MM;
+            movement->horizontal += 0;
+            break;
+        
+        case LEFT:
+            movement->vertical += 0;
+            movement->horizontal -= CELL_MM;
+            break;
     }
 }
 
-void compare_directions(Track_arrays* track, Movement movement, Direction previous_direction, Direction current_direction, int* number_of_targets_added)
+
+void store_target(Track_arrays* track, Movement movement)
 {
-    if (previous_direction != current_direction)
+    track->xarray[track->number_of_targets] = movement.horizontal;
+    track->yarray[track->number_of_targets] = movement.vertical;
+    track->number_of_targets++;
+}
+
+void add_goal_to_track(Track_arrays* track, Movement movement)
+{
+    store_target(track, movement);
+}
+
+void print_track(Track_arrays track)
+{
+    printf("[X][Y]\n");
+    printf("-------\n");
+    for (int i = 0; i < track.size; i++)
     {
-        track->xarray[*number_of_targets_added] = movement.horizontal;
-        track->yarray[*number_of_targets_added] = movement.vertical;
-        *number_of_targets_added++;
+        printf("[%4.lf][%4.lf]\n", track.xarray[i], track.yarray[i]);
     }
 }
 
 Track_arrays convert_path_to_robot_track(Queue path)
 {
+    //Track_arrays contains an xarray and an yarray to be used in track
     Track_arrays track;
+    track.size = 0;
+    track.number_of_targets = 0;
+    
+    //Movement - to keep track of vertical and horisontal movement of the robot
     Movement movement;
-    Direction current_direction, previous_direction;
-    int number_of_targets_added=0;
+    movement.horizontal = 0;
+    movement.vertical = 0;
 
-    if (path.head == NULL)
-    {
-        printf("Trying to use an empty path.\n");
-        exit(1);
-    }
+    //Direction keeps track of which way was moved now and what was moved previously
+    Direction direction = START;
 
-    Q_Element* current_cell;
-    Q_Element* previous_cell = pop_queue(&path);
+    //The current cell in the path we are observing
+    Q_Element current_cell;
 
+    // Set the the previous cell to the starting cell, to determine
+    // the current_direction at the beginning.
+    Q_Element previous_cell = pop_queue(&path);
 
     while (!empty_queue(&path))
     {
         current_cell = pop_queue(&path);
 
-        //everytthing
-        printf("[%d, %d]->", current_cell->i, current_cell->j);
+        if (direction_change(current_cell, previous_cell, &direction, &movement))
+        {
+            store_target(&track, movement);
+        }
 
-
-        previous_cell=current_cell;
-    }
-    /*
-    for (current_cell = previous_cell->next;
-         current_cell->next != NULL;
-         current_cell = current_cell->next)
-    {
+        increse_movement(direction, &movement);
         
-        printf("[%d, %d]->", current_cell->i, current_cell->j);
+        previous_cell = current_cell;
     }
-    */
+    add_goal_to_track(&track, movement);
+
+    track.size = track.number_of_targets;
+
     printf("\n");
-    
+    print_track(track);
     return track;
 }
 
@@ -174,8 +217,8 @@ void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
     place_start_and_end_on_map(current_map, *start_cell, *goal_cell);
     path = Plan(current_map, &queue, *start_cell, *goal_cell);
 
-    Track_arrays coordinates_for_robot = convert_path_to_robot_track(path);
-    //Track(coordinates_for_robot);
+    Track_arrays track = convert_path_to_robot_track(path);
+    FuzyTrack(track.xarray, track.yarray, track.size);
 
     printPrettyMap(*current_map, path);
     print_queue(path);
@@ -325,28 +368,6 @@ void initialize_cells(Cell* start_cell, Cell* goal_cell)
     goal_cell->i = 5;
     goal_cell->j = 5;
 }
-/*
-double* path_to_robot_coordiantes(Queue path)
-{
-    double previous_i, previous_j;
-    int direction;
-    unsigned int steps = 1;
-    // Iterate through the path
-        // Read cell values i,j
-
-        // if (previous_i != i && previous_j == j)
-            // horizontal change
-
-        // if (previous_i == i && previous_j != j)
-            // vertical change
-
-            // store previous cell as robot coordinate as (steps * CELL_MM)
-            //Set steps to 1.
-
-        // else
-            //Add to steps
-}
-*/
 
 void lab6()
 {

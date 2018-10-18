@@ -5,8 +5,10 @@
 
 typedef struct
 {
-    float* xarray;
-    float* yarray;
+    float xarray[200];
+    float yarray[200];
+    int size;
+    int number_of_targets;
 }Track_arrays;
 
 typedef struct
@@ -14,11 +16,11 @@ typedef struct
     int horizontal, vertical;
 } Movement;
 
-typedef enum {UP, RIGHT, DOWN, LEFT} Direction;
+typedef enum {START, UP, RIGHT, DOWN, LEFT} Direction;
 
 void printMenuOptions();
 Track_arrays convert_path_to_robot_track(Queue path);
-void direction_change(Q_Element current_cell, Q_Element previous_cell,
+bool direction_change(Q_Element current_cell, Q_Element previous_cell,
                       Direction* direction, Movement* movement);
 void wait_for_user();
 void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map);
