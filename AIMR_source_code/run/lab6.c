@@ -15,9 +15,10 @@
 #define CHANGE_START_POSITION 3
 #define CHANGE_GOAL_POSITION 4
 #define CHANGE_MAP 5
+#define CHANGE_AVOID 6
 #define EXIT 9
 
-#define NUM_OF_MAPS 4
+#define NUM_OF_MAPS 5
 
 #define CELL_MM 41
 
@@ -79,7 +80,26 @@ static int real_map_info[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-Map_custom easy_map, medium_map, hard_map, real_map;
+static int empty_map_info[16][16] = {
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
+Map_custom easy_map, medium_map, hard_map, real_map, empty_map;
 Map_custom maps[NUM_OF_MAPS];
 
 void wait_for_user()
@@ -96,7 +116,8 @@ void printMenuOptions() {
     printf("[2] Change all input variables.\n");
     printf("[3] Change start position.\n");
     printf("[4] Change Goal position.\n"); 
-    printf("[5] Change the map.\n"); 
+    printf("[5] Change the map.\n");
+    printf("[6] Enable or disable avoid.\n");  
     printf("[9] Exit the program.\n"); 
 }
 
@@ -229,7 +250,7 @@ Track_arrays convert_path_to_robot_track(Queue path)
     return track;
 }
 
-void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
+void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map, bool avoid)
 {
     Queue path, queue;
     queue_init(&path);
@@ -240,18 +261,18 @@ void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
 
     Track_arrays track = convert_path_to_robot_track(path);
     printPrettyMap(*current_map, path);
-    FuzzyTrack(track.xarray, track.yarray, track.size);
+    FuzzyTrack(track.xarray, track.yarray, track.size, avoid);
 
     wait_for_user();
 }
 
-bool menu(int menu_choice, Cell* start_cell, Cell* goal_cell, Map_custom* current_map)
+bool menu(int menu_choice, Cell* start_cell, Cell* goal_cell, Map_custom* current_map, bool* avoid)
 {
     switch (menu_choice)
     {
         case RUN_DEFAULT_PROGRAM:
             clear();
-            run(start_cell, goal_cell, current_map);
+            run(start_cell, goal_cell, current_map, *avoid);
             break;
 
         case CHANGE_ALL_INPUTS:
@@ -273,6 +294,11 @@ bool menu(int menu_choice, Cell* start_cell, Cell* goal_cell, Map_custom* curren
             clear();
             change_current_map(current_map);
             break;
+
+        case CHANGE_AVOID:
+            clear();
+            *avoid = !(*avoid);
+         break;
 
         case EXIT:
             return false;
@@ -380,6 +406,9 @@ void initialize_maps()
 
     real_map.map = real_map_info;
     strcpy(real_map.name, "Real map");
+
+    empty_map.map = empty_map_info;
+    strcpy(empty_map.name, "Empty map");
 }
 
 void initialize_cells(Cell* start_cell, Cell* goal_cell)
@@ -397,6 +426,7 @@ void lab6()
     
     int menu_choice;
     Cell start_cell, goal_cell;
+    bool avoid= true;
     //queue_init(&main_queue);
     initialize_maps();
     initialize_cells(&start_cell, &goal_cell);
@@ -406,7 +436,8 @@ void lab6()
     maps[1] = medium_map;
     maps[2] = hard_map;
     maps[3] = real_map;
-    current_map = real_map;
+    maps[4] = empty_map;
+    current_map = empty_map;
 
     do {
         clear();
@@ -415,7 +446,15 @@ void lab6()
         printf("Current values:\n");
         printf("Start cell: [%2d, %2d]\n", start_cell.j, start_cell.i);
         printf("Goal cell:  [%2d, %2d]\n", goal_cell.j, goal_cell.i);
-        printf("Map_custom: %s\n", current_map.name);
+        printf("Chosen map: %s\n", current_map.name);
+        if (avoid)
+        {
+            printf("Avoid enabled\n");
+        }
+        else
+        {
+            printf("Avoid disabled\n");
+        }
         printf("-----------------------\n\n");
         
         printMenuOptions();
@@ -423,5 +462,5 @@ void lab6()
         scanf("%d", &menu_choice);
 
     }
-    while (menu(menu_choice, &start_cell, &goal_cell, &current_map)); 
+    while (menu(menu_choice, &start_cell, &goal_cell, &current_map, &avoid)); 
 }

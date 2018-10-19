@@ -13,32 +13,22 @@ void AvoidRules();
 /** @brief
  * 
  */
-void GoTo_FRB(float xt, float yt);
+void GoTo_FRB(float xt, float yt, bool avoid);
 
 /** @brief
  * 
  */
-double ResponseToVelGoto(double response);
+double ResponseToVel(double response);
 
 /** @brief
  * 
  */
-double ResponseToRotGoto(double response);
+double ResponseToRot(double response);
 
 /** @brief
  * 
  */
-double ResponseToVelAvoid(double response);
-
-/** @brief
- * 
- */
-double ResponseToRotAvoid(double response);
-
-/** @brief
- * 
- */
-void FuzzyTrack(float* xarray, float* yarray, int n);
+void FuzzyTrack(float* xarray, float* yarray, int n, bool avoid);
 
 /** @brief
  * 

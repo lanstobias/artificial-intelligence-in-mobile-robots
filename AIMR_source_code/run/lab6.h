@@ -23,8 +23,8 @@ Track_arrays convert_path_to_robot_track(Queue path);
 bool direction_change(Q_Element current_cell, Q_Element previous_cell,
                       Direction* direction, Movement* movement);
 void wait_for_user();
-void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map);
-bool menu(int menu_choice, Cell* start_cell, Cell* goal_cell, Map_custom* current_map);
+void run(Cell* start_cell, Cell* goal_cell, Map_custom* current_map, bool avoid);
+bool menu(int menu_choice, Cell* start_cell, Cell* goal_cell, Map_custom* current_map, bool* avoid);
 void change_start_cell(Cell* start_cell);
 void change_goal_cell(Cell* goal_cell);
 void change_current_map(Map_custom* current_map);

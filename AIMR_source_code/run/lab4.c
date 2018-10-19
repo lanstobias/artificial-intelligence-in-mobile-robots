@@ -15,21 +15,14 @@ double vel, rot, final_speed, final_rotation_speed;
 FILE* fp;
 
 // DangerThresholdS
-#define NoDanger 3800
-#define FullDanger 600
+#define NoDanger 180
+#define FullDanger 400
 
 // Macros
-// Goto
-#define VMAX_GOTO 160
-#define VMIN_GOTO -80
-#define RMAX_GOTO 2
-#define RMIN_GOTO -2
-
-// Avoid
-#define VMAX_AVOID 100
-#define VMIN_AVOID 0
-#define RMAX_AVOID 2
-#define RMIN_AVOID -2
+#define VELMAX 160
+#define VELMIN -80
+#define ROTMAX 2
+#define ROTMIN -2
 
 #define AND(x,y) (((x) < (y)) ? (x) : (y))  // min
 #define OR(x,y) (((x) < (y)) ? (y) : (x))   // max
@@ -75,35 +68,19 @@ void GoToRules(float xt, float yt)
 };
 
 //==========================================================================//
-//                      Response to velocity (Avoid obsticle)               //
-//==========================================================================//
-double ResponseToVelAvoid(double response)
-{
-    return (double)(VMIN_AVOID + response * (VMAX_AVOID - VMIN_AVOID));
-}
-
-//==========================================================================//
 //                      Response to velocity (GoTo)                         //
 //==========================================================================//
-double ResponseToVelGoto(double response)
+double ResponseToVel(double response)
 {
-    return (double)(VMIN_GOTO + response * (VMAX_GOTO - VMIN_GOTO));
-}
-
-//==========================================================================//
-//                      ResponseToRot (Avoid obsticle)                      //
-//==========================================================================//
-double ResponseToRotAvoid(double response)
-{
-    return (double)(RMIN_AVOID + response * (RMAX_AVOID - RMIN_AVOID));
+    return (double)(VELMIN + response * (VELMAX - VELMIN));
 }
 
 //==========================================================================//
 //                      ResponseToRot (GoTo)                                //
 //==========================================================================//
-double ResponseToRotGoto(double response)
+double ResponseToRot(double response)
 {
-    return (double)(RMAX_GOTO + response * (RMIN_GOTO - RMAX_GOTO));
+    return (double)(ROTMAX + response * (ROTMIN - ROTMAX));
 }
 
 //==========================================================================//
@@ -171,33 +148,43 @@ void AvoidRules()
 
     // First, read values of ir[0] ... ir[7] from the robot //
     Sensors ir = GetIR();
-    print_ir_values(ir);
+    //print_ir_values(ir);
 
     // Second, compute truth of predicates // 
-    Obs_Left = RampDown(MAX(ir.sensor[5], ir.sensor[6]), FullDanger, NoDanger); 
-    Obs_Right = RampDown(MAX(ir.sensor[1], ir.sensor[2]), FullDanger, NoDanger); 
+    Obs_Left = RampUp(MAX(ir.sensor[5], ir.sensor[6]), NoDanger, FullDanger); 
+    Obs_Right = RampUp(MAX(ir.sensor[1], ir.sensor[2]), NoDanger, FullDanger); 
     Obs_Ahead = RampUp(MAX(ir.sensor[0], ir.sensor[7]), NoDanger, FullDanger);
 
-    printf("Obs_Left: %lf, Obs_Right: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
+    //printf("Obs_Left: %lf, Obs_Right: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
 
     // Third, the fuzzy rules //
     RULESET;
-        IF (AND(Obs_Left, NOT(Obs_Right))); ROT(RIGHT); 
-        IF (AND(Obs_Right, NOT(Obs_Left))); ROT(LEFT); 
-        IF (AND(Obs_Right, Obs_Left)); ROT(AHEAD);
+    /*
+        IF (OR(AND(Obs_Left, NOT(Obs_Right)), AND(Obs_Ahead, NOT(Obs_Right)))); ROT(RIGHT); 
+        IF (OR(AND(Obs_Right, NOT(Obs_Left)), AND(Obs_Ahead, Obs_Right))); ROT(LEFT); 
+        IF (AND(NOT(OR(Obs_Right, Obs_Left)), NOT(Obs_Ahead))); ROT(AHEAD);
 
-        IF (Obs_Ahead); VEL(BACK);
+        IF (OR(OR(Obs_Right, Obs_Left), Obs_Ahead)); VEL(NONE);
         IF (AND(OR(Obs_Right, Obs_Left), NOT(Obs_Ahead))); VEL(SLOW);
-        IF (NOT(OR(OR(Obs_Right,Obs_Left), Obs_Ahead))); VEL(FAST);
-    RULEEND;
+        IF (NOT(OR(OR(Obs_Right, Obs_Left), Obs_Ahead))); VEL(FAST);
+        */
 
-    printf("ante: %lf\n", ante);
+        IF (AND(Obs_Left, NOT(Obs_Right))); ROT(RIGHT);
+        IF (AND(Obs_Right, NOT(Obs_Left))); ROT(LEFT);
+        IF (AND(NOT(OR(Obs_Right, Obs_Left)), NOT(Obs_Ahead))); ROT(AHEAD);
+        //IF (AND(Obs_Right, Obs_Left)); ROT(AHEAD);
+
+        //IF (Obs_Ahead); VEL(BACK);
+        IF (OR(OR(Obs_Right, Obs_Left), Obs_Ahead)); VEL(NONE);
+        IF (AND(OR(Obs_Right, Obs_Left), NOT(Obs_Ahead))); VEL(SLOW);
+        IF (NOT(OR(OR(Obs_Right, Obs_Left), Obs_Ahead))); VEL(FAST);
+    RULEEND;
 };
 
 //==========================================================================//
 //                      GoTo_FRB (Fuzzy Rule based)                         //
 //==========================================================================//
-void GoTo_FRB(float xt, float yt)
+void GoTo_FRB(float xt, float yt, bool avoid)
 {
     do {
         // Compute current position
@@ -210,14 +197,18 @@ void GoTo_FRB(float xt, float yt)
         ClearFSet(vrot);
 
         // Run the behaviour
+        if (avoid)
+        {
+            AvoidRules();
+        }
         GoToRules(xt, yt);
 
         // Defuzzify and set rot/vel
         DeFuzzify(vrot, 3, &rot);
         DeFuzzify(vlin, 4, &vel);
 
-        final_speed = ResponseToVelGoto(vel); 
-        final_rotation_speed = ResponseToRotGoto(rot); 
+        final_speed = ResponseToVel(vel); 
+        final_rotation_speed = ResponseToRot(rot); 
 
         //printf("vel: %lf, rot: %lf\n\n", vel, rot);
         //printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
@@ -255,21 +246,21 @@ void run_AvoidRules()
     while (i < 300)
     { 
         update_position();
-        printCoordinatesToFile(&fp);
+        //printCoordinatesToFile(&fp);
 
         // Reset Fuzzy sets
         ClearFSet(vlin);
         ClearFSet(vrot);
 
         AvoidRules();
-        printSets();
+        //printSets();
 
         DeFuzzify(vrot, 3, &rot);
         DeFuzzify(vlin, 4, &vel);
 
-        final_speed = ResponseToVelAvoid(vel); 
-        final_rotation_speed = ResponseToRotAvoid(rot); 
-        printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
+        final_speed = ResponseToVel(vel); 
+        final_rotation_speed = ResponseToRot(rot); 
+        //printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
         
         SetPolarSpeed(final_speed, final_rotation_speed);
 
@@ -282,12 +273,11 @@ void run_AvoidRules()
 //==========================================================================//
 //                      Track Function (Avoid Obsticles)                    //
 //==========================================================================//
-void FuzzyTrack(float* xarray, float* yarray, int n)
+void FuzzyTrack(float* xarray, float* yarray, int n, bool avoid)
 {
 	for (int i=0; i< n; i++)
 	{
-        
-		GoTo_FRB(xarray[i], yarray[i]);
+		GoTo_FRB(xarray[i], yarray[i], avoid);
 	}
 	
 }
@@ -308,15 +298,16 @@ void lab4()
     //openFile(&fp);
     //GoTo_FRB(xt, yt); 
     //closeFile(&fp);
-
+    /*
 	int n = 4;
 	
 	float xarray[10] = {240, 240, 0, 0};
 	float yarray[10] = {0, 240, 240, 0};
 	
 	FuzzyTrack(xarray, yarray, n);
+    */
 
     //openFile(&fp);
-    //run_AvoidRules();
+    run_AvoidRules();
     //closeFile(&fp);
 }
