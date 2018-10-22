@@ -6,13 +6,13 @@
 #include "lab4.h"
 
 // Globals
-float dx,dy;
-double err_th, err_pos;
-Velocity dummyVelocity;
-FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here, ante;
-FSet vlin, vrot;
-double vel, rot, final_speed, final_rotation_speed;
-FILE* fp;
+static float dx,dy;
+static double err_th, err_pos;
+static FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here;
+static FSet vlin, vrot;
+static double vel, rot, final_speed, final_rotation_speed;
+static Velocity dummyVelocity;
+static FILE* fp;
 
 // DangerThresholdS
 #define NoDanger 180

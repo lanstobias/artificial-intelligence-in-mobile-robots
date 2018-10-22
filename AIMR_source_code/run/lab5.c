@@ -251,7 +251,7 @@ Queue Plan(Map_custom* map, Queue* queue, Cell start_cell, Cell goal_cell)
     if (!breadth_first_search(map, queue, start_cell, goal_cell))
     {
         printf("Did not find the goal :(\n");
-        return path;
+        exit(1);
     }
 
     Cell current_cell, best_cell, neighbor_cell;

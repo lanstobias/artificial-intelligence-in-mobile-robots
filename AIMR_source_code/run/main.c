@@ -6,6 +6,7 @@
 #include "lab4.h"
 //#include "lab5.h"
 #include "lab6.h"
+#include "final_challenge.h"
 
 #define ROBOT_NUMBER "2"
 
@@ -15,9 +16,9 @@
 int main(int argc, char *argv[])
 {
 	// epuck connection
-	epuck(ROBOT_NUMBER);
-	ClearSteps();
-	SetPosture(0,0,0);
+	//epuck(ROBOT_NUMBER);
+	//ClearSteps();
+	//SetPosture(0,0,0);
 	// Run program
 	printf("Starting...\n");
 
@@ -27,7 +28,8 @@ int main(int argc, char *argv[])
 	//lab3();
 	//lab4();
     //lab5();
-	lab6();
+	//lab6();
+	final_challenge();
 
 	printf("\nDone...\n");
 
