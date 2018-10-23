@@ -72,7 +72,14 @@ void GoToRules(float xt, float yt)
 //==========================================================================//
 double ResponseToVel(double response)
 {
-    return (double)(VELMIN + response * (VELMAX - VELMIN));
+    double vel_response = (double)(VELMIN + response * (VELMAX - VELMIN));
+
+    if (vel_response < 0.05 && vel_response > -0.05)
+    {
+        return 0.0;
+    }
+
+    return vel_response;
 }
 
 //==========================================================================//
@@ -80,7 +87,14 @@ double ResponseToVel(double response)
 //==========================================================================//
 double ResponseToRot(double response)
 {
-    return (double)(ROTMAX + response * (ROTMIN - ROTMAX));
+    double rot_response = (double)(ROTMAX + response * (ROTMIN - ROTMAX));
+
+    if (rot_response < 0.05 && rot_response > -0.05)
+    {
+        return 0.0;
+    }
+
+    return rot_response;
 }
 
 //==========================================================================//

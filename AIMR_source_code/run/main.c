@@ -16,9 +16,9 @@
 int main(int argc, char *argv[])
 {
 	// epuck connection
-	//epuck(ROBOT_NUMBER);
-	//ClearSteps();
-	//SetPosture(0,0,0);
+	epuck(ROBOT_NUMBER);
+	ClearSteps();
+	SetPosture(0,0,0);
 	// Run program
 	printf("Starting...\n");
 
