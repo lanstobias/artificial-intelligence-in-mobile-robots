@@ -9,8 +9,14 @@
 #include "final_challenge.h"
 
 // Macros
-#define NO_DANGER 180
-#define FULL_DANGER 400 
+#define NO_DANGER 120
+#define FULL_DANGER 300
+
+#define NO_DANGER_FRONT 120
+#define FULL_DANGER_FRONT 300
+
+#define NO_DANGER_SIDES 120
+#define FULL_DANGER_SIDES 300
 
 #define VELMAX 160
 #define VELMIN -80
@@ -75,6 +81,7 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
     err_pos = calculate_epos(dx,dy);	
     err_th = ( (calculate_Eth(dx, dy) * 180.0) / M_PI );
     Sensors ir = GetIR();
+    print_ir_values(ir);
     
     // Compute fuzzy predicates
     Obs_Left = RampUp(MAX(ir.sensor[5], ir.sensor[6]), NO_DANGER, FULL_DANGER); 
@@ -101,6 +108,8 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
         //If goal is ahead of you but there is an obstacle ahead of you and not to the sides, turn to either side
         IF (AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Left)))); ROT(LEFT);
         IF (AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Right)))); ROT(RIGHT);
+
+        IF (AND(Obs_Ahead, AND(Obs_Left, Obs_Right))); ROT(RIGHT);
         
         //Goto vel        
         IF (OR(Pos_Here, NOT(Pos_Ahead))); VEL(NONE);
@@ -129,7 +138,7 @@ void print_Sets()
 void go_to(float xt, float yt)
 {
     do {
-        update_position();
+        //update_position();
 
         // Reset Fuzzy sets
         ClearFSet(vlin);
@@ -144,10 +153,11 @@ void go_to(float xt, float yt)
         final_speed = ResponseToVel(vel); 
         final_rotation_speed = ResponseToRot(rot); 
 
+        
         printf("vel: %lf, rot: %lf\n\n", vel, rot);
         printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
         print_Sets();
-
+        
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
 

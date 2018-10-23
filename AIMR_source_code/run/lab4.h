@@ -25,6 +25,8 @@ double ResponseToVel(double response);
  */
 double ResponseToRot(double response);
 
+void print_ir_values(Sensors ir);
+
 /** @brief
  * 
  */
