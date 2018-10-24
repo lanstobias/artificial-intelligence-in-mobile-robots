@@ -20,7 +20,7 @@
 
 #define NUM_OF_MAPS 5
 
-#define CELL_MM 41
+#define CELL_MM 36
 
 // Globals
 static int hard_map_info[16][16] = {  

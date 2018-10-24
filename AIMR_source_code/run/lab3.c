@@ -43,7 +43,7 @@ float calculate_Eth(float dx, float dy)
 
     angle = atan2f(dy, dx);
     angle -= GetPosture().th;
-    angle = normalizeAngle(angle);
+	angle = normalizeAngle(angle);
 
     return angle;
 }
@@ -57,18 +57,20 @@ Velocity calculateVelocity_angle(float Kp_th, float Eth)
 
     turn.r = (Kp_th * Eth);
 
+	const float max_speed = 250;
+
     //Limit max and min speeds - positive turn values
-    if (turn.r> 0 && turn.r>250)
-    turn.r=250;
-    if (turn.r>0 && turn.r<30)
-    turn.r=30;
+    if (turn.r > 0 && turn.r > max_speed)
+    	turn.r = max_speed;
+    if (turn.r > 0 && turn.r < 30)
+   		turn.r = 30;
 
     //Limit max and min speeds - negative turn values
-    if (turn.r<0 && turn.r<-250)
-    turn.r=-250;
+    if (turn.r < 0 && turn.r< -max_speed)
+    	turn.r= -max_speed;
     
-    if (turn.r<0 && turn.r>-30)
-    turn.r=-30;
+    if (turn.r < 0 && turn.r > -30)
+    	turn.r= -30;
 
 
 	turn.l = -(turn.r);
@@ -125,7 +127,7 @@ void GoTo_DaC(float xt, float yt)
 			break;
 		}
 		printRobotValues(velocity, Epos, Eth);
-		printCoordinatesToFile(&filePointer);
+		//printCoordinatesToFile(&filePointer);
 
 		if (fabsf(Eth) > delta_th)
 		{
@@ -209,17 +211,19 @@ void closeFile(FILE** filePointer)
 //==========================================================================//
 void lab3()
 {	
-	openFile(&filePointer);
+	//openFile(&filePointer);
     ClearSteps();
 	printf("Test lab3\n\n");
 
 	Kp_pos = 10;
 	Kp_th = 500;
 	delta_pos = 30.0;
-	delta_th = (float)(PI / 24);
+	delta_th = (float)(PI / 48);
 
-	//float xt = -180;
-	//float yt = 240;
+	float xt = -300.0;
+	float yt = 0.0;
+
+	//GoTo_DaC(xt, yt);
 	
 	int n = 4;
 	
@@ -228,5 +232,5 @@ void lab3()
 	
 	Track(xarray, yarray, n);
 
-	closeFile(&filePointer);
+	//closeFile(&filePointer);
 }

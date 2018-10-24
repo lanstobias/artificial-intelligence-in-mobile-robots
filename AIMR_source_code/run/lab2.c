@@ -31,6 +31,8 @@ Steps read_displacement_of_wheels()
 	// Convert dL, dR to mm
 	steps_mm = enc2mm(steps);
 
+	//printf("steps_mm: (l: %d, r: %d), steps: (l: %d, r: %d)\n", steps_mm.l, steps_mm.r, steps.l, steps.r);
+
   return steps_mm;
 }
 
@@ -39,20 +41,20 @@ Steps read_displacement_of_wheels()
 //==========================================================================//
 Posture compute_relative_displacement(Steps steps_mm)
 {
-  Posture posture_displacement;
+    Posture posture_displacement;
 
 	int dR = steps_mm.r;
 	int dL = steps_mm.l;
 
 	// Compute d and delta as above
 	float d = (float)((dR + dL) / 2);
-	float delta = (float)((dR - dL) / ROBOT_DIAMETER);
+	float delta = (float)((dR - dL) / 47.0);
 	// Compute Cartesian  displacement dx, dy
-	posture_displacement.x = (float)(d * cos(delta / 2));
-	posture_displacement.y = (float)(d * sin(delta / 2));
-	posture_displacement.th = delta;
+	posture_displacement.x = (float)(d * cosf(delta / 2));
+	posture_displacement.y = (float)(d * sinf(delta / 2));
+	posture_displacement.th = normalizeAngle(delta);
 
-  return posture_displacement;
+    return posture_displacement;
 }
 
 //==========================================================================//
@@ -90,9 +92,16 @@ void convert_to_global_values(Posture relative_displacement)
 	float dy = relative_displacement.y;
 	float dth = relative_displacement.th;
 
-	posture_new.x = x0 + dx * cos(th0) - dy * sin(th0);
-	posture_new.y = y0 + dx * sin(th0) + dy * cos(th0);
+	posture_new.x = x0 + dx * cosf(th0) - dy * sinf(th0);
+	posture_new.y = y0 + dx * sinf(th0) + dy * cosf(th0);
 	posture_new.th = normalizeAngle(th0 + dth);
+
+	printf("----- Convert to global values: ----- \n");
+	printf("x0: %f, y0: %f, th0: %f\n", x0, y0, th0);
+	printf("dx: %f, dy: %f, dth: %f\n", dx, dy, dth);
+	float angle_rad = posture_new.th;
+    float angle_deg = angle_rad * (180.0 / M_PI);
+    printf("Posture_new_x: %.1f, posture_new_y: %.1f, rad: %.3f, deg: %.4f\n", posture_new.x, posture_new.y, angle_rad, angle_deg);
 
 	// Write new posture
 	SetPosture(posture_new.x, posture_new.y, posture_new.th);
