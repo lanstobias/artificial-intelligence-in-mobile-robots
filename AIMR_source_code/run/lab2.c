@@ -95,13 +95,15 @@ void convert_to_global_values(Posture relative_displacement)
 	posture_new.x = x0 + dx * cosf(th0) - dy * sinf(th0);
 	posture_new.y = y0 + dx * sinf(th0) + dy * cosf(th0);
 	posture_new.th = normalizeAngle(th0 + dth);
-
+	
+	/*
 	printf("----- Convert to global values: ----- \n");
 	printf("x0: %f, y0: %f, th0: %f\n", x0, y0, th0);
 	printf("dx: %f, dy: %f, dth: %f\n", dx, dy, dth);
 	float angle_rad = posture_new.th;
     float angle_deg = angle_rad * (180.0 / M_PI);
     printf("Posture_new_x: %.1f, posture_new_y: %.1f, rad: %.3f, deg: %.4f\n", posture_new.x, posture_new.y, angle_rad, angle_deg);
+	*/
 
 	// Write new posture
 	SetPosture(posture_new.x, posture_new.y, posture_new.th);

@@ -94,6 +94,7 @@ static double vel, rot;
 FPred Pos_Left, Pos_Right, Pos_Ahead, Pos_Here;
 FPred Obs_Left, Obs_Right, Obs_Ahead, Obs_Diagonal_Left, Obs_Diagonal_Right, Obs_Ahead_Right, Obs_Ahead_Left;
 double final_speed, final_rotation_speed;
+int rad = 0;
 
 void goto_and_avoid_monolithic_rules(float xt, float yt)
 {
@@ -106,9 +107,9 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
     //print_ir_values(ir);
 
     //printf("ante: %lf\n", ante);
-    printf("err_th: %lf err_pos: %lf\n", err_th, err_pos);
-    Posture posture = GetPosture();
-    printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
+    //printf("err_th: %lf err_pos: %lf\n", err_th, err_pos);
+    //Posture posture = GetPosture();
+    //printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
     printf("---------------------------\n\n");
     
     // Compute fuzzy predicates
@@ -121,12 +122,17 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
     Pos_Ahead = MIN( RampUp(err_th, -30, 0), RampDown(err_th, 0, 30) );
     Pos_Here = RampDown(err_pos, 10, 50);
 
+
+    printf("Rad %d\n", rad++);
+    printf("Obs_Left: %lf, Obs_Rightt: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
+    printf("Pos_Left: %lf, Pos_Right: %lf, Pos_Ahead: %lf, PosHere: %lf\n", Pos_Left, Pos_Right, Pos_Ahead, Pos_Here);
+
     // Fuzzy rules
     RULESET;
         // Rotate towards the goal unless an obstacle is in the way and unless
         // we are at the goal position.
-        IF (AND(AND(Pos_Left, NOT(Obs_Left)), NOT(Pos_Here))); ROT(LEFT);
-        IF (AND(AND(Pos_Right, NOT(Obs_Right)), NOT(Pos_Here))); ROT(RIGHT);
+        IF (AND(AND(Pos_Left, (AND(NOT(Obs_Left), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(LEFT);
+        IF (AND(AND(Pos_Right, (AND(NOT(Obs_Right), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(RIGHT);
         IF (OR(AND(Pos_Ahead, NOT(Obs_Ahead)), Pos_Here)); ROT(AHEAD);
 
         // If goal is to the side but there is an obstacle there and not 
@@ -134,18 +140,20 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
         IF (AND(Pos_Left, AND(Obs_Left, NOT(Obs_Ahead)))); ROT(AHEAD);
         IF (AND(Pos_Right, AND(Obs_Right, NOT(Obs_Ahead)))); ROT(AHEAD);
         
+        IF (AND(AND(Pos_Left, AND(Obs_Left, Obs_Ahead)), NOT(Obs_Right))); ROT(RIGHT);
+        IF (AND(Pos_Right, AND(Obs_Right, Obs_Ahead))); ROT(LEFT);
+
         // If goal is ahead of you but there is an obstacle ahead of you
         // and not to the sides, turn to either side.
-        IF (AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Left)))); ROT(LEFT);
-        IF (AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Right)))); ROT(RIGHT);
+        IF (AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Left))), Obs_Right)); ROT(LEFT);
+        IF (AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Right))), Obs_Left)); ROT(RIGHT);
 
-        IF (AND(Obs_Ahead, AND(Obs_Left, Obs_Right))); ROT(RIGHT);
+        //IF (AND(Obs_Ahead, AND(Obs_Left, Obs_Right))); ROT(RIGHT);
         
         // Goto vel.
-        IF (OR(Pos_Here, NOT(Pos_Ahead))); VEL(NONE);
 
         // Avoid vev.
-        IF (Obs_Ahead); VEL(NONE);
+        IF (OR(Pos_Here, Obs_Ahead)); VEL(NONE);
         IF (AND(OR(Obs_Right, Obs_Left), NOT(Obs_Ahead))); VEL(SLOW);
         IF (AND(NOT(OR(OR(Obs_Right, Obs_Left), Obs_Ahead)), AND(Pos_Ahead, NOT(Pos_Here)) )); VEL(FAST);
     RULEEND;
@@ -182,11 +190,11 @@ void go_to(float xt, float yt)
 
         final_speed = ResponseToVel(vel); 
         final_rotation_speed = ResponseToRot(rot); 
-        /*
+        
         printf("vel: %lf, rot: %lf\n\n", vel, rot);
         printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
         print_Sets();
-        */
+        
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
 
@@ -227,9 +235,10 @@ void final_challenge()
     //Run with start, goal and map
     Cell start_cell, goal_cell;
     Map_custom map;
+    rad=0;
 
-    start_cell.i = 4; start_cell.j = 4;
-    goal_cell.i = 12; goal_cell.j = 12;
+    start_cell.i = 8; start_cell.j = 1;
+    goal_cell.i = 8; goal_cell.j = 10;
     map.map = empty_map_info;
 
     run(start_cell, goal_cell, map);
