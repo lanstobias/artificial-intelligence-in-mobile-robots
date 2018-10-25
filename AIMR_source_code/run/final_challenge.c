@@ -67,7 +67,26 @@ static int custom_map_info[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
 };
 
-static int empty_map_info[16][16] = {
+static int custom_map2_info[16][16] = {
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -3, -3, -3, -3, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -3, -3, -3, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}
+};
+
+static int emptiest_map_info[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
@@ -110,7 +129,7 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
     //printf("err_th: %lf err_pos: %lf\n", err_th, err_pos);
     //Posture posture = GetPosture();
     //printf("x: %lf, y: %lf, th: %lf\n", posture.x, posture.y, posture.th);
-    printf("---------------------------\n\n");
+    //printf("---------------------------\n\n");
     
     // Compute fuzzy predicates
     Obs_Left = RampUp(MAX(ir.sensor[5], ir.sensor[6]), NO_DANGER_SIDES, FULL_DANGER_SIDES); 
@@ -122,19 +141,19 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
     Pos_Ahead = MIN( RampUp(err_th, -30, 0), RampDown(err_th, 0, 30) );
     Pos_Here = RampDown(err_pos, 30, 60);
 
-    printf("Rad %d\n", rad++);
-    printf("Obs_Left: %lf, Obs_Rightt: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
-    printf("Pos_Left: %lf, Pos_Right: %lf, Pos_Ahead: %lf, PosHere: %lf\n", Pos_Left, Pos_Right, Pos_Ahead, Pos_Here);
+    //printf("Rad %d\n", rad++);
+    //printf("Obs_Left: %lf, Obs_Rightt: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
+    //printf("Pos_Left: %lf, Pos_Right: %lf, Pos_Ahead: %lf, PosHere: %lf\n", Pos_Left, Pos_Right, Pos_Ahead, Pos_Here);
 
     // Fuzzy rules
     RULESET;
         // Rotate towards the goal unless an obstacle is in the way and unless
         // we are at the goal position.
 
-        IF (AND(AND(Pos_Left, NOT(Obs_Left)), NOT(Pos_Here))); ROT(LEFT);
-        IF (AND(AND(Pos_Right, NOT(Obs_Right)), NOT(Pos_Here))); ROT(RIGHT);
-        //F (AND(AND(Pos_Left, (AND(NOT(Obs_Left), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(LEFT);
-        //IF (AND(AND(Pos_Right, (AND(NOT(Obs_Right), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(RIGHT);
+        //IF (AND(AND(Pos_Left, NOT(Obs_Left)), NOT(Pos_Here))); ROT(LEFT);
+        //IF (AND(AND(Pos_Right, NOT(Obs_Right)), NOT(Pos_Here))); ROT(RIGHT);
+        IF (AND(AND(Pos_Left, (AND(NOT(Obs_Left), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(LEFT);
+        IF (AND(AND(Pos_Right, (AND(NOT(Obs_Right), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(RIGHT);
         IF (OR(AND(Pos_Ahead, NOT(Obs_Ahead)), Pos_Here)); ROT(AHEAD);
 
         // If goal is to the side but there is an obstacle there and not 
@@ -147,10 +166,11 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
 
         // If goal is ahead of you but there is an obstacle ahead of you
         // and not to the sides, turn to either side.
-        IF (AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Left))), Obs_Right)); ROT(LEFT);
-        IF (AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Right))), Obs_Left)); ROT(RIGHT);
+        IF (AND(AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Left))), Obs_Right), NOT(Pos_Right))); ROT(LEFT);
+        IF (AND(AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Right))), Obs_Left), NOT(Pos_Left))); ROT(RIGHT);
 
-        //IF (AND(AND(Obs_Ahead, AND(Obs_Left, Obs_Right)), Pos_Right)); ROT(RIGHT);
+        //IF (AND(AND(Obs_Ahead, AND(Obs_Left, Obs_Right)), AND(Pos_Right, AND(NOT(Pos_Left), NOT(Pos_Ahead))))); ROT(RIGHT);
+        //IF (AND(AND(Obs_Ahead, AND(Obs_Left, Obs_Right)), AND(Pos_Left, AND(NOT(Pos_Right), NOT(Pos_Ahead))))); ROT(LEFT);
         
         // Goto vel.
 
@@ -192,11 +212,11 @@ void go_to(float xt, float yt)
 
         final_speed = ResponseToVel(vel); 
         final_rotation_speed = ResponseToRot(rot); 
-        
+        /*
         printf("vel: %lf, rot: %lf\n\n", vel, rot);
         printf("final_speed: %lf, final_rotation_speed: %lf\n", final_speed, final_rotation_speed);
         print_Sets();
-        
+        */
         // Send commands to robot
         SetPolarSpeed(final_speed, final_rotation_speed);
 
@@ -240,9 +260,9 @@ void final_challenge()
     Map_custom map;
     rad = 0;
 
-    start_cell.i = 12; start_cell.j = 2;
-    goal_cell.i = 12; goal_cell.j = 12;
-    map.map = custom_map_info;
+    start_cell.i = 3; start_cell.j = 2;
+    goal_cell.i = 7; goal_cell.j = 2;
+    map.map = custom_map2_info;
 
     run(start_cell, goal_cell, map);
 }
