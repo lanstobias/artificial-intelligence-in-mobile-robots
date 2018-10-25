@@ -50,16 +50,16 @@
 // Global variables
 static int custom_map_info[16][16] = {
     {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-    {-1, -2, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -1},
-    {-1, -2, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -1},
-    {-1, -2, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -1},
-    {-1, -2, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -1},
-    {-1, -2, -2, -2, -2, -2, -2, -2, -3, -2, -2, -2, -2, -2, -2, -1},
-    {-1, -2, -2, -2, -2, -2, -3, -3, -3, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
-    {-1, -3, -3, -3, -3, -3, -3, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
+    {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
     {-1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -1},
@@ -120,8 +120,7 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
     Pos_Left = RampUp(err_th, 0, 60);
     Pos_Right = RampDown(err_th, -60, 0);
     Pos_Ahead = MIN( RampUp(err_th, -30, 0), RampDown(err_th, 0, 30) );
-    Pos_Here = RampDown(err_pos, 10, 50);
-
+    Pos_Here = RampDown(err_pos, 30, 60);
 
     printf("Rad %d\n", rad++);
     printf("Obs_Left: %lf, Obs_Rightt: %lf, Obs_Ahead: %lf\n", Obs_Left, Obs_Right, Obs_Ahead);
@@ -131,8 +130,11 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
     RULESET;
         // Rotate towards the goal unless an obstacle is in the way and unless
         // we are at the goal position.
-        IF (AND(AND(Pos_Left, (AND(NOT(Obs_Left), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(LEFT);
-        IF (AND(AND(Pos_Right, (AND(NOT(Obs_Right), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(RIGHT);
+
+        IF (AND(AND(Pos_Left, NOT(Obs_Left)), NOT(Pos_Here))); ROT(LEFT);
+        IF (AND(AND(Pos_Right, NOT(Obs_Right)), NOT(Pos_Here))); ROT(RIGHT);
+        //F (AND(AND(Pos_Left, (AND(NOT(Obs_Left), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(LEFT);
+        //IF (AND(AND(Pos_Right, (AND(NOT(Obs_Right), NOT(Obs_Ahead)))), NOT(Pos_Here))); ROT(RIGHT);
         IF (OR(AND(Pos_Ahead, NOT(Obs_Ahead)), Pos_Here)); ROT(AHEAD);
 
         // If goal is to the side but there is an obstacle there and not 
@@ -148,13 +150,13 @@ void goto_and_avoid_monolithic_rules(float xt, float yt)
         IF (AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Left))), Obs_Right)); ROT(LEFT);
         IF (AND(AND(Pos_Ahead, AND(Obs_Ahead, NOT(Obs_Right))), Obs_Left)); ROT(RIGHT);
 
-        //IF (AND(Obs_Ahead, AND(Obs_Left, Obs_Right))); ROT(RIGHT);
+        //IF (AND(AND(Obs_Ahead, AND(Obs_Left, Obs_Right)), Pos_Right)); ROT(RIGHT);
         
         // Goto vel.
 
         // Avoid vev.
         IF (OR(Pos_Here, Obs_Ahead)); VEL(NONE);
-        IF (AND(OR(Obs_Right, Obs_Left), NOT(Obs_Ahead))); VEL(SLOW);
+        IF (AND((OR(OR(Obs_Right, Obs_Left), OR(Pos_Left, Pos_Right))), NOT(Obs_Ahead))); VEL(SLOW);
         IF (AND(NOT(OR(OR(Obs_Right, Obs_Left), Obs_Ahead)), AND(Pos_Ahead, NOT(Pos_Here)) )); VEL(FAST);
     RULEEND;
 }
@@ -226,6 +228,7 @@ void run(Cell start_cell, Cell goal_cell, Map_custom map)
     Track_arrays track = convert_path_to_robot_track(path);
     printPrettyMap(map, path);
     run_trajectory(track.xarray, track.yarray, track.size);
+    printPrettyMap(map, path);
 }
 
 void final_challenge()
@@ -235,11 +238,11 @@ void final_challenge()
     //Run with start, goal and map
     Cell start_cell, goal_cell;
     Map_custom map;
-    rad=0;
+    rad = 0;
 
-    start_cell.i = 8; start_cell.j = 1;
-    goal_cell.i = 8; goal_cell.j = 10;
-    map.map = empty_map_info;
+    start_cell.i = 12; start_cell.j = 2;
+    goal_cell.i = 12; goal_cell.j = 12;
+    map.map = custom_map_info;
 
     run(start_cell, goal_cell, map);
 }

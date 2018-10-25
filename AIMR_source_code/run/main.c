@@ -8,7 +8,7 @@
 #include "lab6.h"
 #include "final_challenge.h"
 
-#define ROBOT_NUMBER "0"
+#define ROBOT_NUMBER "2"
 
 //==============================================================================//
 //                                  main                                        //
